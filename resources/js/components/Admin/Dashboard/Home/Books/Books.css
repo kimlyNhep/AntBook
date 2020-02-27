@@ -1,0 +1,24 @@
+* {
+    box-sizing: border-box;
+}
+
+.image-list {
+    width: 180px;
+    height: 360px;
+    border-radius: 1rem;
+    margin-right: 0.5rem;
+    overflow: hidden;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+}
+
+.scroll-menu-arrow {
+    padding: 20px;
+    cursor: pointer;
+}
+
+.scroll-menu-arrow--disabled {
+    visibility: hidden;
+}
