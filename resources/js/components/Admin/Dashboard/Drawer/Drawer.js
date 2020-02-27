@@ -288,9 +288,9 @@ export default function MiniDrawer(props) {
                 <List>
                     <ListItem button key='Profile' onClick={handleOpenProfile}>
                         <ListItemIcon>
-                            <Avatar alt='kanao' src={Profile} />
+                            <Avatar alt='kanao' src={user.profile} />
                         </ListItemIcon>
-                        <ListItemText primary='kimly' />
+                        <ListItemText primary={user.username} />
                         {openProfile ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
                     <List>
