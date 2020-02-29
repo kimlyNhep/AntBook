@@ -33,6 +33,8 @@ Route::group(['middleware' => 'auth:admin_api'],function ()
     Route::get('/admin/logout','Api\Auth\Adminscontroller@logout');
     Route::put('/admin/Rejected/{book_id}','Api\Auth\Adminscontroller@rejectedBooks');
     Route::put('/admin/Genre/{genre_id}','Api\Auth\Adminscontroller@updateGenre');
+    Route::get('/admin/Genre/get/{genre_id}','Api\Auth\Adminscontroller@getGenreById');
+    Route::delete('/admin/Genre/delete/{genre_id}','Api\Auth\Adminscontroller@deleteGenre');
 });
 
 Route::group(['middleware' => 'auth:api'],function ()

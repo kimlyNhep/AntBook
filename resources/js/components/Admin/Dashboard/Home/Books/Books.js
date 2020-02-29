@@ -146,11 +146,11 @@ function Books(props) {
                     alignCenter={false}
                     hideSingleArrow={true}
                     alignOnResize={true}
-                    selected={displayData[0].img}
+                    selected={displayData[0].images}
                     scrollToSelected={true}
                 />
             ) : (
-                <div>Not Found</div>
+                <div></div>
             )}
         </Paper>
     );

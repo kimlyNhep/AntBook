@@ -21,13 +21,11 @@ export default class Home extends Component {
             this.setState({
                 genres: response.data.genres
             },() => console.log(this.state.genres))
-            // console.log(response.data.genres)
         })
         .catch(error => console.log(error));
     }
 
     render() {
-        // console.log(this.state);
         return (
             <React.Fragment>
                 {
@@ -42,5 +40,5 @@ export default class Home extends Component {
             </React.Fragment>
         )
         }
-    }
+}
 

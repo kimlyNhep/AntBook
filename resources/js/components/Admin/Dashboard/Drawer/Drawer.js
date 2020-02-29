@@ -31,6 +31,8 @@ import Paper from '@material-ui/core/Paper';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 import CPNAddGenre from '../Home/Genres/Add';
+import CPNEditGenre from '../Home/Genres/Update';
+import CPNDeleteGenre from '../Home/Genres/Delete';
 
 const drawerWidth = 240;
 
@@ -120,6 +122,8 @@ export default function MiniDrawer(props) {
     const [openProfile, setOpenProfile] = React.useState(false);
     const [viewProfile, setViewProfile] = React.useState(false);
     const [addGenre,setAddGenre] = React.useState(false);
+    const [editGenre,setEditGenre] = React.useState(false);
+    const [deleteGenre,setDeleteGenre] = React.useState(false);
 
     const [user,setUser] = React.useState({
         firstname: '',
@@ -137,6 +141,14 @@ export default function MiniDrawer(props) {
 
     const handleAddGenre = () => {
         setAddGenre(!addGenre);
+    }
+
+    const handleEditGenreOpen = () => {
+        setEditGenre(!editGenre);
+    }
+
+    const handleDeleteGenreOpen = () => {
+        setDeleteGenre(!deleteGenre);
     }
 
     const handleCategory = () => {
@@ -190,6 +202,21 @@ export default function MiniDrawer(props) {
         handleCloseProfile();
     }
 
+
+    const handleDeleteGenre = (_id) => {
+        axios.delete(`api/admin/Genre/delete/${_id}`,
+        {
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+            }
+        }).then(
+            response => {
+                console.log(response.data)
+                handleLoadGenre();
+            }
+        ).catch(error => console.log(error.response));
+    }
+
     const handleSaveGenre = () => {
         axios.post('/api/admin/Genre/add',
             {
@@ -208,6 +235,32 @@ export default function MiniDrawer(props) {
 
     const handleCloseGenre = () => {
         setAddGenre(false);
+    }
+
+    const handleEditGenre = (_id) => {
+        axios.put(`/api/admin/Genre/${_id}`,
+            {
+                title: genre.title
+            },
+            {
+                headers: {
+                    Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+                }
+            }
+        ).then(response => {
+            // return console.log(response.data);
+
+            handleLoadGenre();
+        }).catch(error => console.log(error));
+        handleCloseEditGenre();
+    }
+
+    const handleCloseEditGenre = () => {
+        setEditGenre(false);
+    }
+
+    const handleCloseDeleteGenre = () => {
+        setDeleteGenre(false);
     }
 
     const handleLoadGenre = () => {
@@ -288,9 +341,9 @@ export default function MiniDrawer(props) {
                 <List>
                     <ListItem button key='Profile' onClick={handleOpenProfile}>
                         <ListItemIcon>
-                            <Avatar alt='kanao' src={Profile} />
+                            <Avatar alt='kanao' src={user.Profile} />
                         </ListItemIcon>
-                        <ListItemText primary='kimly' />
+                        <ListItemText primary={user.username} />
                         {openProfile ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
                     <List>
@@ -396,13 +449,13 @@ export default function MiniDrawer(props) {
                         </ListItemIcon>
                         <ListItemText primary='Add' />
                     </ListItem>
-                    <ListItem button key='Update' className={classes.nested}>
+                    <ListItem button key='Update' className={classes.nested} onClick={handleEditGenreOpen}>
                         <ListItemIcon>
                             <EditIcon />
                         </ListItemIcon>
                         <ListItemText primary='Update' />
                     </ListItem>
-                    <ListItem button key='Delete' className={classes.nested}>
+                    <ListItem button key='Delete' className={classes.nested} onClick={handleDeleteGenreOpen}>
                         <ListItemIcon>
                             <DeleteIcon />
                         </ListItemIcon>
@@ -471,6 +524,22 @@ export default function MiniDrawer(props) {
                     genre={genre}
                     setGenre={setGenre}
                 />)}
+            {editGenre && (
+                <CPNEditGenre
+                    open={editGenre}
+                    handleSave={handleEditGenre}
+                    handleClose={handleCloseEditGenre}
+                    genre={genre}
+                    setGenre={setGenre}
+                />)}
+            {deleteGenre && (
+                <CPNDeleteGenre
+                    open={deleteGenre}
+                    handleSave={handleDeleteGenre}
+                    handleClose={handleCloseDeleteGenre}
+                    genre={genre}
+                    setGenre={setGenre}
+            />)}
         </div>
     );
 }

@@ -283,4 +283,16 @@ class AdminsController extends Controller
 
         return response()->json(['genre' => $genre],201);
     }
+
+    public function getGenreById($genre_id)
+    {
+        $genre = Genre::find($genre_id)->get();
+        return response()->json(['genre' => $genre],200);
+    }
+
+    public function deleteGenre($genre_id)
+    {
+        $genre = Genre::find($genre_id)->delete();
+        return response()->json(['genre' => $genre],200);
+    }
 }
