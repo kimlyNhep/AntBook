@@ -196,15 +196,19 @@ export default function MiniDrawer(props) {
     }
 
     const handleSaveProfile = () => {
+
+        let fd = new FormData();
+        fd.append('first_name',user.firstname);
+        fd.append('last_name',user.lastname);
+        fd.append('username',user.username);
+        fd.append('email',user.email);
+        fd.append('profile',user.profile,user.profile.name);
+
         axios.post('/api/user/Update',
-            {
-                first_name: user.firstname,
-                last_name: user.lastname,
-                username: user.username,
-                email: user.email
-            },
+            fd,
             {
                 headers: {
+                    'content-type': `multipart/form-data;`,
                     Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
                 }
             }

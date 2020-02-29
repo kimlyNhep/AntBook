@@ -57,6 +57,10 @@ export default function AlignItemsList() {
         setMore(false);
     };
 
+    const handleReadBook = (resource) => {
+        window.open(resource);
+    }
+
     React.useEffect(() => {
         axios.get('/api/admin/Approve/list',{
             headers: {
@@ -98,34 +102,8 @@ export default function AlignItemsList() {
                         primary={book.title}
                         secondary={
                             <React.Fragment>
-                                <Typography
-                                    component='span'
-                                    variant='body2'
-                                    className={classes.inline}
-                                    color='textPrimary'
-                                >
-                                    Author
-                                </Typography>
-                                {' — ' + book.author} <br />
-                                <Typography
-                                    component='span'
-                                    variant='body2'
-                                    className={classes.inline}
-                                    color='textPrimary'
-                                >
-                                    Owner
-                                </Typography>
-                                {' — ' + book.user} <br />
-                                <Typography
-                                    component='span'
-                                    variant='body2'
-                                    className={classes.inline}
-                                    color='textPrimary'
-                                >
-                                    Genre
-                                </Typography>
-                                {' — ' + book.genre} <br />
-                                <Button>Read</Button>
+                                <Button onClick={() => handleReadBook(book.resource)}>Read</Button>
+                                <Button onClick={() => handleMoreClick(book)}><InfoIcon/></Button>
                             </React.Fragment>
                         }
                     />

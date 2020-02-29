@@ -121,6 +121,7 @@ function AddPopUp(props) {
             }
         }).then(response => setGenreList(response.data.genres)
         ).catch(error =>  console.log(error.response));
+        props.setBook({...props.book,genre_id: props.genre_id});
     },[]);
 
     return (
@@ -165,19 +166,6 @@ function AddPopUp(props) {
                                 value={props.book.author}
                                 onChange={handleAuthorChange}
                             />
-                            <FormControl className={classes.formControl}>
-                                <InputLabel id='select-genre-label'>
-                                    Genre
-                                </InputLabel>
-                                <Select
-                                    labelId='select-genre-label'
-                                    id='select-genre'
-                                    value={selectGenre}
-                                    onChange={handleGenreChange}
-                                >
-                                    {genreList.map(genre => <MenuItem value={genre.id} key={genre.title}>{genre.title}</MenuItem>)}
-                                </Select>
-                            </FormControl>
                             {selectedAttachFile && (
                                 <TextField
                                     id='file'

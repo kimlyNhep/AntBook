@@ -43,10 +43,10 @@ export default function DetailItem(props) {
                                 cols={1}
                                 className={classes.gridList}
                             >
-                                <GridListTile key={props.item.img}>
+                                <GridListTile key={props.item.title}>
                                     <img
-                                        src={props.item.img}
-                                        alt={props.item.name}
+                                        src={props.item.images}
+                                        alt={props.item.title}
                                     />
                                 </GridListTile>
                             </GridList>
@@ -71,6 +71,7 @@ export default function DetailItem(props) {
                                 label='Number of Pages'
                                 type='number'
                                 fullWidth
+                                value={props.item.pages}
                                 InputProps={{
                                     readOnly: true
                                 }}
@@ -82,6 +83,7 @@ export default function DetailItem(props) {
                                 label='Author'
                                 type='text'
                                 fullWidth
+                                value={props.item.author}
                                 InputProps={{
                                     readOnly: true
                                 }}
@@ -93,6 +95,7 @@ export default function DetailItem(props) {
                                 label='Genre'
                                 type='text'
                                 fullWidth
+                                value={props.item.genre}
                                 InputProps={{
                                     readOnly: true
                                 }}
@@ -104,6 +107,7 @@ export default function DetailItem(props) {
                                 label='Owner'
                                 type='text'
                                 fullWidth
+                                value={props.item.user}
                                 InputProps={{
                                     readOnly: true
                                 }}

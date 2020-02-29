@@ -80,9 +80,19 @@ class UsersController extends Controller
     {
 
         $user_id = $this->info()->id;
-
-        $books = TmpBook::where([
-            ['user_id', '=', $user_id],['genre_id','=',$genre_id]])->get();
+            foreach(TmpBook::with(['User','Genre'])->where([
+                ['user_id', '=', $user_id],['genre_id','=',$genre_id]])->get() as $book) {
+                $books[] = array(
+                    'title' => $book->title,
+                    'author' => $book->author,
+                    'pages' => $book->pages,
+                    'images' => $book->images,
+                    'resource' => $book->resource,
+                    'user' => $book->User->username,
+                    'user_id' => $book->User->id,
+                    'genre' => $book->Genre->title,
+                    'genre_id' => $book->Genre->id);
+            }
 
         return response()->json(['books' => $books],200);
     }
@@ -115,11 +125,16 @@ class UsersController extends Controller
             'last_name'=> 'required|string|min:4|max:20',
             'username'=> 'required|string|min:4|max:20',
             'email'=> 'required|string|email|max:20',
+            'profile' => 'required|mimes:jpg,png,svg,jpeg|max:100000',
         ]);
 
         if($validator->fails()){
             return response()->json($validator->errors()->toJson(), 400);
         }
+
+        $imageFilename = time().'.'.$request->profile->extension();
+
+        $request->profile->move(public_path('/images/Profiles/'), $imageFilename);
 
         $user_id = $this->info()->id;
 
@@ -128,6 +143,7 @@ class UsersController extends Controller
             'last_name' => $request->get('last_name'),
             'username' => $request->get('username'),
             'email' => $request->get('email'),
+            'profile' => '/images/Profiles/' . $imageFilename,
         ]);
 
         return response()->json(['success'=> $user],200);

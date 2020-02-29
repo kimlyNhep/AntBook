@@ -161,20 +161,25 @@ function Books(props) {
                 'content-type': `multipart/form-data;`,
                 Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
             }
-        }).then(response => console.log(response)
-        ).catch(error => console.log(error.response));
+        }).then(response => {
+            handleAddBookClose()
+            handleOnLoad();
+        }).catch(error => console.log(error.response));
     }
 
     React.useEffect(() => {
+        handleOnLoad();
+    },[])
+
+    const handleOnLoad = () => {
         axios.get(`/api/user/book/get/${props.gId}`,{
             headers: {
                 Authorization: 'Bearer ' + localStorage.getItem('token'),
-                responseType: 'blob'
             }
         }).then(response =>
             setBookData([...response.data.books])
         ).catch(error => console.log(error.response));
-    },[])
+    }
 
     const handleSearch = event => {
         setSearchText(event.target.value);
@@ -235,10 +240,11 @@ function Books(props) {
                     scrollToSelected={true}
                 />
             ) : (
-                <div>Not Found</div>
+                <div>No Data to load</div>
             )}
             {addBook && (
-                <AddPopUp open={addBook} handleClose={handleAddBookClose} handleSave={handleAddBookSave} book={book} setBook={setBook}/>
+                <AddPopUp open={addBook} handleClose={handleAddBookClose} handleSave={handleAddBookSave}
+                book={book} genre_id={props.gId} setBook={setBook}/>
             )}
         </Paper>
     );

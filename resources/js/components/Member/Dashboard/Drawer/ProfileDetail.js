@@ -15,12 +15,26 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
+import PhotoCamera from '@material-ui/icons/PhotoCamera';
 
 const useStyle = makeStyles(theme => ({
-    preview: {
-        width: 180,
-        height: 260
-    }
+    gridList: {
+        width: '100%',
+        height: 260,
+        display: 'flex',
+        alignItems: 'center'
+    },
+    controls: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    hide: {
+        display: 'none'
+    },
 }));
 
 export default function DetailItem(props) {
@@ -37,6 +51,8 @@ export default function DetailItem(props) {
         nonEditableUsername: true,
         nonEditableEmail: true
     });
+    const [selectedFile, setSelectedFile] = React.useState();
+    const [imagePreviewUrl, setImagePreviewUrl] = React.useState();
 
     const handleEditableFirstname = () => {
         setValues({
@@ -67,6 +83,16 @@ export default function DetailItem(props) {
         props.setUser({...props.user,[prop]: event.target.value});
     }
 
+    const handlePreview = event => {
+        if (!event.target.files || event.target.files.length === 0) {
+            setSelectedFile(undefined);
+            return;
+        }
+
+        // I've kept this example simple by using the first image instead of multiple
+        setSelectedFile(event.target.files[0]);
+    };
+
     React.useEffect(() => {
         axios.get('/api/user/info', {
             headers: {
@@ -81,6 +107,7 @@ export default function DetailItem(props) {
                     email: response.data.email,
                     profile: response.data.profile
             });
+            setImagePreviewUrl(response.data.profile);
         }).catch(error=>console.log(error));
     },[]);
 
@@ -121,6 +148,20 @@ export default function DetailItem(props) {
         };
     }, [values.nonEditableEmail]);
 
+    React.useEffect(() => {
+        if (!selectedFile) {
+            setImagePreviewUrl(undefined);
+            return;
+        }
+
+        const objectUrl = URL.createObjectURL(selectedFile);
+        setImagePreviewUrl(objectUrl);
+        props.setUser({...props.user,
+            profile: selectedFile
+    });
+        return () => URL.revokeObjectURL(objectUrl);
+    }, [selectedFile]);
+
     return (
         <div>
             <Dialog
@@ -131,15 +172,39 @@ export default function DetailItem(props) {
             >
                 <DialogTitle id='alert-dialog-title'>{'Detail'}</DialogTitle>
                 <DialogContent>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={1}>
                         <Grid item xs={4}>
-                            <img
-                                src={props.user.profile}
-                                alt='Profile'
-                                className={classes.preview}
+                            <GridList
+                                cellHeight={180}
+                                cols={1}
+                                className={classes.gridList}
+                            >
+                                <GridListTile key={props.user.username}>
+                                    <img
+                                        src={imagePreviewUrl}
+                                        alt={props.user.username}
+                                    />
+                                </GridListTile>
+                            </GridList>
+                            <input
+                                accept='image/*'
+                                className={classes.hide}
+                                id='contained-button-file'
+                                multiple
+                                type='file'
+                                onChange={handlePreview}
                             />
+                            <label htmlFor='contained-button-file'>
+                                <IconButton
+                                    color='primary'
+                                    aria-label='upload picture'
+                                    component='span'
+                                >
+                                    <PhotoCamera />
+                                </IconButton>
+                            </label>
                         </Grid>
-                        <Grid item xs={8}>
+                        <Grid item xs={8} className={classes.controls}>
                             <FormControl
                                 className={clsx(
                                     classes.margin,
@@ -156,7 +221,7 @@ export default function DetailItem(props) {
                                     id='standard-adornment-first-name'
                                     type='text'
                                     inputRef={inputRefFirstname}
-                                    disabled={values.nonEditableFirstname}
+                                    readOnly={values.nonEditableFirstname}
                                     value={props.user.firstname}
                                     onChange={handleChange('firstname')}
                                     endAdornment={
@@ -192,7 +257,7 @@ export default function DetailItem(props) {
                                 <Input
                                     id='standard-adornment-first-name'
                                     type='text'
-                                    disabled={values.nonEditableLastname}
+                                    readOnly={values.nonEditableLastname}
                                     inputRef={inputRefLastname}
                                     value={props.user.lastname}
                                     onChange={handleChange('lastname')}
@@ -227,7 +292,7 @@ export default function DetailItem(props) {
                                 <Input
                                     id='standard-adornment-first-name'
                                     type='text'
-                                    disabled={values.nonEditableUsername}
+                                    readOnly={values.nonEditableUsername}
                                     inputRef={inputRefUsername}
                                     value={props.user.username}
                                     onChange={handleChange('username')}
@@ -263,7 +328,7 @@ export default function DetailItem(props) {
                                     id='standard-adornment-first-name'
                                     type='email'
                                     inputRef={inputRefEmail}
-                                    disabled={values.nonEditableEmail}
+                                    readOnly={values.nonEditableEmail}
                                     value={props.user.email}
                                     onChange={handleChange('email')}
                                     endAdornment={
