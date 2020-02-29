@@ -28,13 +28,14 @@ function BookItem(props) {
         setSelectedBook(null);
     };
     const handleOpenPDF = source => {
+        // window.open(source);
         window.open(source);
     };
 
     return (
         <div
             style={{
-                backgroundImage: `url(${props.book.img})`,
+                backgroundImage: `url(${props.book.images})`,
                 backgroundPosition: 'center',
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
@@ -48,7 +49,7 @@ function BookItem(props) {
                 </IconButton>
                 <Button
                     color='secondary'
-                    onClick={() => handleOpenPDF(props.book.source)}
+                    onClick={() => handleOpenPDF(props.book.resource)}
                 >
                     Read
                 </Button>

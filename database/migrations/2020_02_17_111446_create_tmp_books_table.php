@@ -22,6 +22,7 @@ class CreateTmpBooksTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('images');
             $table->string('resource');
+            $table->boolean('approve')->default(false);
             $table->timestamps();
         });
     }

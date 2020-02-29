@@ -168,10 +168,12 @@ function Books(props) {
     React.useEffect(() => {
         axios.get(`/api/user/book/get/${props.gId}`,{
             headers: {
-                Authorization: 'Bearer ' + localStorage.getItem('token')
+                Authorization: 'Bearer ' + localStorage.getItem('token'),
+                responseType: 'blob'
             }
-        }).then(response => setBookData([...response.data.books]))
-        .catch(error => console.log(error.response));
+        }).then(response =>
+            setBookData([...response.data.books])
+        ).catch(error => console.log(error.response));
     },[])
 
     const handleSearch = event => {

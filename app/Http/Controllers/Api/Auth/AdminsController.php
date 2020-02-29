@@ -8,6 +8,7 @@ use App\Genre;
 use App\Http\Controllers\Controller;
 use App\TmpBook;
 use App\User;
+use Facade\FlareClient\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -174,62 +175,112 @@ class AdminsController extends Controller
         return response()->json(['genres' => $genres],200);
     }
 
-    public function getAllBooks()
+    public function getAllBooks($genre_id)
     {
-        $books = Book::all();
+        foreach(Book::with(['User','Genre'])->where('genre_id','=',$genre_id)->get() as $book) {
+            $books[] = array(
+                'title' => $book->title,
+                'author' => $book->author,
+                'pages' => $book->pages,
+                'images' => $book->images,
+                'resource' => $book->resource,
+                'user' => $book->User->username,
+                'user_id' => $book->User->id,
+                'genre' => $book->Genre->title,
+                'genre_id' => $book->Genre->id);
+        }
+
         return response()->json(['books' => $books],200);
     }
 
     public function getAllTmpBooks()
     {
-            foreach(TmpBook::with(['User','Genre'])->get() as $tmpBook) {
+            foreach(TmpBook::with(['User','Genre'])
+                ->where('approve','=',false)
+                ->get() as $tmpBook) {
                 $tmpBooks[] = array(
+                    'id' => $tmpBook->id,
                     'title' => $tmpBook->title,
                     'author' => $tmpBook->author,
                     'pages' => $tmpBook->pages,
                     'images' => $tmpBook->images,
                     'resource' => $tmpBook->resource,
                     'user' => $tmpBook->User->username,
-                    'genre' => $tmpBook->Genre->title);
+                    'user_id' => $tmpBook->User->id,
+                    'genre' => $tmpBook->Genre->title,
+                    'genre_id' => $tmpBook->Genre->id);
             }
         return response()->json(['tmpbooks' => $tmpBooks],200);
     }
 
-    public function approvedBooks(Request $request)
+    public function approvedBooks(Request $request,$book_id)
     {
         $validator = Validator::make($request->all(),
         [
             'title' => 'required|string|min:4|max:50',
             'author'=> 'required|string|min:4|max:20',
             'pages'=> 'required|numeric',
-            'images' => 'required|mimes:jpg,png,svg,jpeg|max:100000',
-            'resource' => 'required|mimes:pdf|max:100000'
+            'images' => 'required',
+            'resource' => 'required',
         ]);
 
         if($validator->fails()){
             return response()->json($validator->errors()->toJson(), 400);
         }
 
-        $imageFilename = time().'.'.$request->images->extension();
+        // get image existing file
+        $image = public_path($request->images);
+        $imageType = time().'.'.\File::extension($image);
+        \File::copy($image,public_path('/images/Stocks/' . $imageType));
 
-        $request->images->move(public_path('/images/Books/'), $imageFilename);
+        $file = public_path($request->resource);
+        $fileType = time().'.'.\File::extension($file);
+        \File::copy($file,public_path('/Files/Stocks/' . $fileType));
 
-        $resourceFilename = time().'.'.$request->resource->extension();
+        $admin_id = $this->info()->id;
 
-        $request->resource->move(public_path('/Files/'), $resourceFilename);
-
-        $user_id = $this->info()->id;
-
+        DB::table('tmp_books')->where('id', $book_id)->update(array('approve'=> 1));
         $book = Book::create([
             'title' => $request->get('title'),
             'author' => $request->get('author'),
             'genre_id' => $request->get('genre_id'),
             'pages' => $request->get('pages'),
-            'user_id' => $user_id,
-            'images' => '/images/Books/' . $imageFilename,
-            'resource' => '/Files/' . $resourceFilename,
+            'user_id' => $request->get('user_id'),
+            'admin_id' => $admin_id,
+            'images' => '/images/Stocks/' . $imageType,
+            'resource' => '/Files/Stocks/' . $fileType,
         ]);
 
         return response()->json(['approvedBook' => $book],201);
+    }
+
+    public function rejectedBooks($book_id)
+    {
+        $book = TmpBook::find($book_id)->updated([
+            'approve' => false,
+        ]);
+
+        return response()->json(['approvedBook' => $book],200);
+    }
+
+    public function updateGenre(Request $request,$genre_id)
+    {
+        $validator = Validator::make($request->all(),
+        [
+            'title' => 'required|string',
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $admin_id = $this->info()->id;
+
+        $genre = Genre::find($genre_id)->update([
+            'title' => $request->get('title'),
+            'admin_id' => $admin_id,
+        ]);
+
+        return response()->json(['genre' => $genre],201);
     }
 }

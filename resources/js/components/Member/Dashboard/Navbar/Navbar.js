@@ -130,7 +130,7 @@ export default function Navbar(props) {
                             history.push('/Member/Home');
                         }}
                     >
-                        BOOK
+                        AntBOOK
                     </Typography>
                     <div className={classes.search}>
                         <div className={classes.searchIcon}>

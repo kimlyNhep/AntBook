@@ -63,6 +63,28 @@ export default function DetailItem(props) {
         setValues({ ...values, nonEditableEmail: !values.nonEditableEmail });
     };
 
+    const handleChange = prop => event => {
+        props.setUser({...props.user,[prop]: event.target.value});
+    }
+
+    React.useEffect(() => {
+        axios.get('/api/user/info', {
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+            }
+        }).then(response => {
+            console.log(response);
+            props.setUser({...props.user,
+                    firstname: response.data.first_name,
+                    lastname: response.data.last_name,
+                    username: response.data.username,
+                    email: response.data.email,
+                    profile: response.data.profile
+            });
+        }).catch(error=>console.log(error));
+    },[]);
+
+
     React.useEffect(() => {
         const timeout = setTimeout(() => {
             if (!values.nonEditableFirstname) inputRefFirstname.current.focus();
@@ -112,7 +134,7 @@ export default function DetailItem(props) {
                     <Grid container spacing={2}>
                         <Grid item xs={4}>
                             <img
-                                src=''
+                                src={props.user.profile}
                                 alt='Profile'
                                 className={classes.preview}
                             />
@@ -135,6 +157,8 @@ export default function DetailItem(props) {
                                     type='text'
                                     inputRef={inputRefFirstname}
                                     disabled={values.nonEditableFirstname}
+                                    value={props.user.firstname}
+                                    onChange={handleChange('firstname')}
                                     endAdornment={
                                         <InputAdornment position='end'>
                                             <IconButton
@@ -170,6 +194,8 @@ export default function DetailItem(props) {
                                     type='text'
                                     disabled={values.nonEditableLastname}
                                     inputRef={inputRefLastname}
+                                    value={props.user.lastname}
+                                    onChange={handleChange('lastname')}
                                     endAdornment={
                                         <InputAdornment position='end'>
                                             <IconButton
@@ -203,6 +229,8 @@ export default function DetailItem(props) {
                                     type='text'
                                     disabled={values.nonEditableUsername}
                                     inputRef={inputRefUsername}
+                                    value={props.user.username}
+                                    onChange={handleChange('username')}
                                     endAdornment={
                                         <InputAdornment position='end'>
                                             <IconButton
@@ -236,6 +264,8 @@ export default function DetailItem(props) {
                                     type='email'
                                     inputRef={inputRefEmail}
                                     disabled={values.nonEditableEmail}
+                                    value={props.user.email}
+                                    onChange={handleChange('email')}
                                     endAdornment={
                                         <InputAdornment position='end'>
                                             <IconButton

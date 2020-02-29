@@ -113,6 +113,7 @@ export default function MiniDrawer(props) {
     const [openCategory, setOpenCategory] = React.useState(true);
     const [openProfile, setOpenProfile] = React.useState(true);
     const [viewProfile, setViewProfile] = React.useState(false);
+    const [genreList,setGenreList] = React.useState([]);
 
     const [user,setUser] = React.useState({
         firstname: '',
@@ -146,12 +147,15 @@ export default function MiniDrawer(props) {
 
     const handleCloseProfile = () => {
         setViewProfile(false);
+        setUser(
+        {...user,
+            firstname: '',
+            lastname: '',
+            username: '',
+            email: '',
+            profile: ''
+        });
     };
-
-    const handleSaveProfile = () => {
-        axios.post()
-        handleCloseProfile();
-    }
 
     const handleLogout = () => {
         axios.get('/api/user/logout',{
@@ -191,8 +195,34 @@ export default function MiniDrawer(props) {
         ).catch(error => console.log(error));
     }
 
+    const handleSaveProfile = () => {
+        axios.post('/api/user/Update',
+            {
+                first_name: user.firstname,
+                last_name: user.lastname,
+                username: user.username,
+                email: user.email
+            },
+            {
+                headers: {
+                    Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+                }
+            }
+        ).then(response => {
+            console.log(response);
+        }).catch(error => console.log(error));
+
+        handleCloseProfile();
+    }
+
     React.useEffect(() => {
         handleLoadProfile();
+
+        axios.get('/api/user/genre/all',).then(response => {
+            setGenreList([...response.data.genres])
+            // console.log(response.data.genres)
+        })
+        .catch(error => console.log(error));
     },[]);
 
     return (
@@ -277,13 +307,13 @@ export default function MiniDrawer(props) {
                 </ListItem>
                 <List>
                     <Collapse in={openCategory} timeout='auto' unmountOnExit>
-                        {['Advanture', 'Love', 'Comedy'].map((text, index) => (
+                        {genreList.map((genre, index) => (
                             <ListItem
                                 button
-                                key={text}
+                                key={genre.title}
                                 className={classes.nested}
                             >
-                                <ListItemText primary={text} />
+                                <ListItemText primary={genre.title} />
                             </ListItem>
                         ))}
                     </Collapse>
@@ -325,6 +355,8 @@ export default function MiniDrawer(props) {
                     open={openProfile}
                     handleClose={handleCloseProfile}
                     handleSave={handleSaveProfile}
+                    user={user}
+                    setUser={setUser}
                 />
             )}
         </div>

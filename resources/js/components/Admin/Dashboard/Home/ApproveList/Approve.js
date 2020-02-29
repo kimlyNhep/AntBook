@@ -12,6 +12,7 @@ import ClearIcon from '@material-ui/icons/Clear';
 import DetailItem from './DetailItem';
 import InfoIcon from '@material-ui/icons/Info';
 import axios from 'axios';
+import PDF from '../../../../../../Assets/Files/sample.pdf';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -68,11 +69,23 @@ export default function AlignItemsList() {
         );
     },[]);
 
+    const handleApproveBooks = (book,_id) => {
+
+        axios.put(`/api/admin/Book/approved/${_id}`,book,{
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+            }
+        }).then(
+            response => console.log(response.data)
+        ).catch(error => console.log(error.response));
+        // console.log('file:',file,'image:',image);
+    }
+
     return (
-        <Grid xs={12}>
+        <Grid item xs={12}>
         {books.length > 0 &&
             books.map(book => (
-            <List className={classes.root}>
+            <List className={classes.root} key={book.title}>
                 <ListItem alignItems='flex-start'>
                     <ListItemAvatar>
                         <img
@@ -118,7 +131,7 @@ export default function AlignItemsList() {
                     />
                     <ListItemIcon>
                         <React.Fragment>
-                            <Button>
+                            <Button onClick={() => handleApproveBooks(book,book.id)}>
                                 <CheckIcon />
                             </Button>
                             <Button>

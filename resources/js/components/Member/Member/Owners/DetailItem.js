@@ -43,10 +43,10 @@ export default function DetailItem(props) {
                                 cols={1}
                                 className={classes.gridList}
                             >
-                                <GridListTile key={props.item.img}>
+                                <GridListTile key={props.item.username}>
                                     <img
-                                        src={props.item.img}
-                                        alt={props.item.name}
+                                        src={props.item.profile}
+                                        alt={props.item.username}
                                     />
                                 </GridListTile>
                             </GridList>
@@ -59,18 +59,18 @@ export default function DetailItem(props) {
                                 label='First name'
                                 type='text'
                                 fullWidth
-                                value={props.item.name}
+                                value={props.item.first_name}
                                 InputProps={{
                                     readOnly: true
                                 }}
                             />
                             <TextField
-                                autoFocus
                                 margin='dense'
                                 id='Lastname'
                                 label='Last name'
                                 type='text'
                                 fullWidth
+                                value={props.item.last_name}
                                 InputProps={{
                                     readOnly: true
                                 }}
@@ -82,6 +82,7 @@ export default function DetailItem(props) {
                                 label='Username'
                                 type='text'
                                 fullWidth
+                                value={props.item.username}
                                 InputProps={{
                                     readOnly: true
                                 }}
@@ -93,6 +94,7 @@ export default function DetailItem(props) {
                                 label='Email'
                                 type='email'
                                 fullWidth
+                                value={props.item.email}
                                 InputProps={{
                                     readOnly: true
                                 }}

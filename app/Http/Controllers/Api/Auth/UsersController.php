@@ -59,7 +59,7 @@ class UsersController extends Controller
 
         $resourceFilename = time().'.'.$request->resource->extension();
 
-        $request->resource->move(public_path('/Files/'), $resourceFilename);
+        $request->resource->move(public_path('/Files/Books/'), $resourceFilename);
 
         $user_id = $this->info()->id;
 
@@ -70,7 +70,7 @@ class UsersController extends Controller
             'pages' => $request->get('pages'),
             'user_id' => $user_id,
             'images' => '/images/Books/' . $imageFilename,
-            'resource' => '/Files/' . $resourceFilename,
+            'resource' => '/Files/Books/' . $resourceFilename,
         ]);
 
         return response()->json(['book' => $book],201);
@@ -78,6 +78,7 @@ class UsersController extends Controller
 
     public function getTmpBooks($genre_id)
     {
+
         $user_id = $this->info()->id;
 
         $books = TmpBook::where([
@@ -104,5 +105,31 @@ class UsersController extends Controller
     {
         $books = Book::all();
         return response()->json(['books' => $books],200);
+    }
+
+    public function updateInfo(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+        [
+            'first_name' => 'required|string|min:4|max:20',
+            'last_name'=> 'required|string|min:4|max:20',
+            'username'=> 'required|string|min:4|max:20',
+            'email'=> 'required|string|email|max:20',
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $user_id = $this->info()->id;
+
+        $user = User::find($user_id)->update([
+            'first_name' => $request->get('first_name'),
+            'last_name' => $request->get('last_name'),
+            'username' => $request->get('username'),
+            'email' => $request->get('email'),
+        ]);
+
+        return response()->json(['success'=> $user],200);
     }
 }
