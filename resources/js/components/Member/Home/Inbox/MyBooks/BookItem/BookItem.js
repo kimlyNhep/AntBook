@@ -5,6 +5,7 @@ import DetailBook from '../DetailItem';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import PDF from '../../../../../../../../public/Files/Books/1582874763.pdf';
+import axios from 'axios';
 
 const useStyles = makeStyles(theme => ({
     icons: { color: 'rgba(255, 255, 255, 0.54)' },
@@ -32,6 +33,28 @@ function BookItem(props) {
         window.open(source);
     };
 
+    const handleEditBook = (newbook) => {
+        var data = new FormData();
+        data.append('title',newbook.title);
+        // fd.append('author',newbook.author);
+        // fd.append('genre_id',newbook.genre_id);
+        // fd.append('pages',newbook.pages);
+        // fd.append('images',newbook.images,newbook.images.name);
+        // fd.append('resource',newbook.resource,newbook.resource.name);
+
+        // axios.put(`/api/user/Book/Update/${props.book.id}`,fd,
+        // {
+        //     headers: {
+        //         'content-type': `multipart/form-data;`,
+        //         Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+        //     }
+        // }).then(response =>
+        //     console.log(response.data)
+        // ).catch(error => console.log(error.response));
+        console.log(data);
+
+    }
+
     return (
         <div
             style={{
@@ -58,7 +81,9 @@ function BookItem(props) {
                 <DetailBook
                     open={viewBook}
                     handleClose={handleCloseViewBook}
+                    handleSave={handleEditBook}
                     item={selectedBook}
+                    bId={props.book.id}
                 />
             )}
         </div>

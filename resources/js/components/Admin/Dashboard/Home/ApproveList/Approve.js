@@ -62,6 +62,10 @@ export default function AlignItemsList() {
     }
 
     React.useEffect(() => {
+        handleOnLoad();
+    },[]);
+
+    const handleOnLoad = () => {
         axios.get('/api/admin/Approve/list',{
             headers: {
                 Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
@@ -71,7 +75,7 @@ export default function AlignItemsList() {
         ).catch (
             error => console.log(error.response)
         );
-    },[]);
+    }
 
     const handleApproveBooks = (book,_id) => {
 
@@ -79,10 +83,22 @@ export default function AlignItemsList() {
             headers: {
                 Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
             }
-        }).then(
-            response => console.log(response.data)
-        ).catch(error => console.log(error.response));
+        }).then(response => {
+            console.log(response.data);
+            handleOnLoad();
+        }).catch(error => console.log(error.response));
         // console.log('file:',file,'image:',image);
+    }
+
+    const handleRejectBook = (_id) => {
+        axios.delete(`/api/admin/Rejected/${_id}`,{
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+            }
+        }).then(response => {
+            console.log(response.data);
+            handleOnLoad();
+        }).catch(error => console.log(error.response));
     }
 
     return (
@@ -112,7 +128,7 @@ export default function AlignItemsList() {
                             <Button onClick={() => handleApproveBooks(book,book.id)}>
                                 <CheckIcon />
                             </Button>
-                            <Button>
+                            <Button onClick={() => handleRejectBook(book.id)}>
                                 <ClearIcon />
                             </Button>
                         </React.Fragment>

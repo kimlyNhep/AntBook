@@ -33,6 +33,7 @@ import axios from 'axios';
 import CPNAddGenre from '../Home/Genres/Add';
 import CPNEditGenre from '../Home/Genres/Update';
 import CPNDeleteGenre from '../Home/Genres/Delete';
+import CPNAddAdmin from './AddPopUp';
 
 const drawerWidth = 240;
 
@@ -116,7 +117,6 @@ export default function MiniDrawer(props) {
     const history = useHistory();
 
     const [open, setOpen] = React.useState(true);
-
     const [openCategory, setOpenCategory] = React.useState(true);
     const [expandAdmin, setExpandAdmin] = React.useState(true);
     const [openProfile, setOpenProfile] = React.useState(false);
@@ -124,7 +124,6 @@ export default function MiniDrawer(props) {
     const [addGenre,setAddGenre] = React.useState(false);
     const [editGenre,setEditGenre] = React.useState(false);
     const [deleteGenre,setDeleteGenre] = React.useState(false);
-
     const [user,setUser] = React.useState({
         firstname: '',
         lastname: '',
@@ -132,12 +131,18 @@ export default function MiniDrawer(props) {
         email: '',
         profile: ''
     });
-
     const[genre,setGenre] = React.useState({
         title: ''
     })
-
     const [genreList,setGenreList] = React.useState([]);
+    const [addAdmin,setAddAdmin] = React.useState(false);
+    const [admin,setAdmin] = React.useState({
+        firstname: '',
+        lastname: '',
+        username: '',
+        email: '',
+        profile: ''
+    });
 
     const handleAddGenre = () => {
         setAddGenre(!addGenre);
@@ -183,15 +188,19 @@ export default function MiniDrawer(props) {
     };
 
     const handleSaveProfile = () => {
+
+        let fd = new FormData();
+        fd.append('first_name',user.firstname);
+        fd.append('last_name',user.lastname);
+        fd.append('username',user.username);
+        fd.append('email',user.email);
+        fd.append('profile',user.profile,user.profile.name);
+
         axios.post('/api/admin/Update',
-            {
-                first_name: user.firstname,
-                last_name: user.lastname,
-                username: user.username,
-                email: user.email
-            },
+            fd,
             {
                 headers: {
+                    'content-type': `multipart/form-data;`,
                     Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
                 }
             }
@@ -292,8 +301,8 @@ export default function MiniDrawer(props) {
             headers: {
                 Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
             }
-        }).then(response => setUser(
-            {...user,
+        }).then(response =>
+            setUser({...user,
             firstname: response.data.first_name,
             lastname: response.data.last_name,
             username: response.data.username,
@@ -303,13 +312,46 @@ export default function MiniDrawer(props) {
         ).catch(error => console.log(error));
     }
 
+    const handleAddAdmin = () => {
+        setAddAdmin(true);
+    }
+
+    const handleSaveAdmin = () => {
+        let fd = new FormData();
+        fd.append('first_name',admin.firstname);
+        fd.append('last_name',admin.lastname);
+        fd.append('username',admin.username);
+        fd.append('email',admin.email);
+        fd.append('password',admin.password);
+        fd.append('password_confirmation',admin.confirmed_password);
+        fd.append('profile',admin.profile,admin.profile.name);
+
+        axios.post('/api/admin/add',
+            fd,
+            {
+                headers: {
+                    'content-type': `multipart/form-data;`,
+                    Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+                }
+            }
+        ).then(response => {
+            console.log(response.data)
+        }).catch(error => console.log(error.response));
+        handleCloseAddAdmin();
+    }
+
+    const handleCloseAddAdmin = () => {
+        setAddAdmin(false);
+    }
+
     React.useEffect(() => {
         handleLoadGenre();
+        handleLoadProfile();
     },[]);
 
     React.useEffect(()=> {
-        console.log(genreList);
-    },[genreList]);
+        console.log('user',user);
+    },[user]);
 
     return (
         <div className={classes.root}>
@@ -341,7 +383,7 @@ export default function MiniDrawer(props) {
                 <List>
                     <ListItem button key='Profile' onClick={handleOpenProfile}>
                         <ListItemIcon>
-                            <Avatar alt='kanao' src={user.Profile} />
+                            <Avatar alt='Profile' src={user.profile} />
                         </ListItemIcon>
                         <ListItemText primary={user.username} />
                         {openProfile ? <ExpandLess /> : <ExpandMore />}
@@ -393,31 +435,12 @@ export default function MiniDrawer(props) {
                 </ListItem>
                 <List>
                     <Collapse in={expandAdmin} timeout='auto' unmountOnExit>
-                        <ListItem button key='Add' className={classes.nested}>
+                        <ListItem button key='Add' className={classes.nested}
+                        onClick={handleAddAdmin}>
                             <ListItemIcon>
                                 <Addbox />
                             </ListItemIcon>
                             <ListItemText primary='Add' />
-                        </ListItem>
-                        <ListItem
-                            button
-                            key='Update'
-                            className={classes.nested}
-                        >
-                            <ListItemIcon>
-                                <EditIcon />
-                            </ListItemIcon>
-                            <ListItemText primary='Update' />
-                        </ListItem>
-                        <ListItem
-                            button
-                            key='Delete'
-                            className={classes.nested}
-                        >
-                            <ListItemIcon>
-                                <DeleteIcon />
-                            </ListItemIcon>
-                            <ListItemText primary='Delete' />
                         </ListItem>
                     </Collapse>
                 </List>
@@ -473,6 +496,9 @@ export default function MiniDrawer(props) {
                                 style={{
                                     backgroundColor: '#673ab7',
                                     color: 'white'
+                                }}
+                                onClick={() => {
+                                    history.push('/Admin/Admin');
                                 }}
                             >
                                 Administrators
@@ -539,6 +565,14 @@ export default function MiniDrawer(props) {
                     handleClose={handleCloseDeleteGenre}
                     genre={genre}
                     setGenre={setGenre}
+            />)}
+            {addAdmin && (
+                <CPNAddAdmin
+                    open={addAdmin}
+                    handleSave={handleSaveAdmin}
+                    handleClose={handleCloseAddAdmin}
+                    admin={admin}
+                    setAdmin={setAdmin}
             />)}
         </div>
     );

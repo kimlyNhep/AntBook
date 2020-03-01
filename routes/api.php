@@ -31,10 +31,12 @@ Route::group(['middleware' => 'auth:admin_api'],function ()
     Route::put('/admin/Book/approved/{book_id}','Api\Auth\Adminscontroller@approvedBooks');
     Route::get('/admin/Approve/list','Api\Auth\Adminscontroller@getAllTmpBooks');
     Route::get('/admin/logout','Api\Auth\Adminscontroller@logout');
-    Route::put('/admin/Rejected/{book_id}','Api\Auth\Adminscontroller@rejectedBooks');
+    Route::delete('/admin/Rejected/{book_id}','Api\Auth\Adminscontroller@rejectedBook');
     Route::put('/admin/Genre/{genre_id}','Api\Auth\Adminscontroller@updateGenre');
     Route::get('/admin/Genre/get/{genre_id}','Api\Auth\Adminscontroller@getGenreById');
     Route::delete('/admin/Genre/delete/{genre_id}','Api\Auth\Adminscontroller@deleteGenre');
+    Route::post('/admin/add','Api\Auth\Adminscontroller@addAdmin');
+    Route::get('/admin/all','Api\Auth\Adminscontroller@getAllAdmin');
 });
 
 Route::group(['middleware' => 'auth:api'],function ()
@@ -45,4 +47,5 @@ Route::group(['middleware' => 'auth:api'],function ()
     Route::get('/user/logout','Api\Auth\Userscontroller@logout');
     Route::get('/user/info','Api\Auth\Userscontroller@info');
     Route::post('/user/Update','Api\Auth\Userscontroller@updateInfo');
+    Route::put('/user/Book/Update/{book_id}','Api\Auth\Userscontroller@updateBook');
 });

@@ -15,7 +15,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import axios from 'axios';
-import {useHistory} from 'react-router-dom';
+import {useHistory,Link} from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
     card: {
@@ -55,6 +55,9 @@ const useStyles = makeStyles(theme => ({
     },
     visibilityIcon: {
         color: '#757575'
+    },
+    link: {
+        textDecoration: 'none'
     }
 }));
 
@@ -175,6 +178,7 @@ export default function LoginCard(props) {
                 <Button size='small' color='secondary'>
                     Login
                 </Button>
+                <Link to='/Admin/Authentication' className={classes.link}>Admin</Link>
             </CardActions>
         </Card>
     );

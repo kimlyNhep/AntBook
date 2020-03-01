@@ -10,6 +10,7 @@ use App\Genre;
 use Exception;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
@@ -83,6 +84,7 @@ class UsersController extends Controller
             foreach(TmpBook::with(['User','Genre'])->where([
                 ['user_id', '=', $user_id],['genre_id','=',$genre_id]])->get() as $book) {
                 $books[] = array(
+                    'id' => $book->id,
                     'title' => $book->title,
                     'author' => $book->author,
                     'pages' => $book->pages,
@@ -147,5 +149,43 @@ class UsersController extends Controller
         ]);
 
         return response()->json(['success'=> $user],200);
+    }
+
+    public function updateBook(Request $request,$book_id)
+    {
+        $validator = Validator::make($request->all(),
+        [
+            'title' => 'required|string|min:4|max:50',
+            'author'=> 'required|string|min:4|max:20',
+            'pages'=> 'required|numeric',
+            'images' => 'required|mimes:jpg,png,svg,jpeg|max:10000000',
+            'resource' => 'required|mimes:pdf|max:10000000'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $imageFilename = time().'.'.$request->images->extension();
+
+        $request->images->move(public_path('/images/Books/'), $imageFilename);
+
+        $resourceFilename = time().'.'.$request->resource->extension();
+
+        $request->resource->move(public_path('/Files/Books/'), $resourceFilename);
+
+        $user_id = $this->info()->id;
+
+        $book = TmpBook::find($book_id)->update([
+            'title' => $request->get('title'),
+            'author' => $request->get('author'),
+            'genre_id' => $request->get('genre_id'),
+            'pages' => $request->get('pages'),
+            'user_id' => $user_id,
+            'images' => '/images/Books/' . $imageFilename,
+            'resource' => '/Files/Books/' . $resourceFilename,
+        ]);
+
+        return response()->json(['success' => true],200);
     }
 }

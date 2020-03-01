@@ -9,6 +9,7 @@ import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridList from '@material-ui/core/GridList';
+import EditComponent from './EditPopUp';
 
 const useStyle = makeStyles(theme => ({
     preview: {

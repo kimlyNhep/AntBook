@@ -12,6 +12,7 @@ import Member from './Member/Home/Home';
 import MBMember from './Member/Member/Member';
 import MYBook from './Member/Home/Inbox/Inbox';
 import CPNNotification from './Admin/Dashboard/Home/ApproveList/Approve';
+import ADAdmin from './Admin/Dashboard/Home/Admins/Admins';
 
 function App() {
     return (
@@ -20,6 +21,7 @@ function App() {
                 <MBDashboard path='/Member/Member' component={MBMember}/>
                 <MBDashboard path='/Member/MyBooks' component={MYBook}/>
                 <Dashboard path='/Admin/Member' component={ADMember}/>
+                <Dashboard path='/Admin/Admin' component={ADAdmin}/>
                 <Dashboard path='/Admin/Notifications' component={CPNNotification}/>
                 <Route path='/Admin/Authentication' component={ADAuthentication}/>
                 <Route path='/Member/Authentication' component={MBAuthentication}/>

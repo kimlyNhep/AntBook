@@ -20,6 +20,8 @@ import Input from '@material-ui/core/Input';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
 
 const useStyles = makeStyles(theme => ({
     formControl: {
@@ -38,8 +40,10 @@ const useStyles = makeStyles(theme => ({
         display: 'none'
     },
     preview: {
-        width: 180,
-        height: 210
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
     }
 }));
 
@@ -238,17 +242,23 @@ function AddPopUp(props) {
                     />
                 </FormControl>
                         </Grid>
-                        <Grid item xs={4}>
-                            <Paper variant='outlined' className={classes.paper}>
+                        <Grid item xs={4} className={classes.preview}>
+                            <GridList
+                                cellHeight={180}
+                                cols={1}
+                                className={classes.gridList}
+                            >
+                                <GridListTile key={props.user.username}>
                                 {selectedFile && (
                                     <img
                                         id='preview'
                                         alt='profile'
                                         src={imagePreviewUrl}
-                                        className={classes.preview}
+                                        // className={classes.preview}
                                     />
                                 )}
-                            </Paper>
+                                </GridListTile>
+                            </GridList>
                             <input
                                 accept='image/*'
                                 className={classes.hide}

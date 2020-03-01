@@ -110,7 +110,7 @@ class AdminsController extends Controller
             'profile' => '/images/Profiles/' . $imageFilename,
         ]);
 
-        return response()->json(['user'=> $user],200);
+        return response()->json(['user'=> $user],201);
     }
 
     public function updateInfo(Request $request)
@@ -121,6 +121,7 @@ class AdminsController extends Controller
             'last_name'=> 'required|string|min:4|max:20',
             'username'=> 'required|string|min:4|max:20',
             'email'=> 'required|string|email|max:20',
+            'profile' => 'required|mimes:jpg,png,svg,jpeg|max:100000',
         ]);
 
         if($validator->fails()){
@@ -129,11 +130,16 @@ class AdminsController extends Controller
 
         $admin_id = $this->info();
 
+        $imageFilename = time().'.'.$request->profile->extension();
+
+        $request->profile->move(public_path('images/Profiles/'), $imageFilename);
+
         $admin = Admin::find($admin_id->id)->update([
             'first_name' => $request->get('first_name'),
             'last_name' => $request->get('last_name'),
             'username' => $request->get('username'),
             'email' => $request->get('email'),
+            'profile' => '/images/Profiles/' . $imageFilename,
         ]);
 
         return response()->json(['success'=> $admin],200);
@@ -254,13 +260,11 @@ class AdminsController extends Controller
         return response()->json(['approvedBook' => $book],201);
     }
 
-    public function rejectedBooks($book_id)
+    public function rejectedBook($book_id)
     {
-        $book = TmpBook::find($book_id)->updated([
-            'approve' => false,
-        ]);
+        $book = TmpBook::find($book_id)->delete();
 
-        return response()->json(['approvedBook' => $book],200);
+        return response()->json(['rejectedBook' => $book],200);
     }
 
     public function updateGenre(Request $request,$genre_id)
@@ -294,5 +298,44 @@ class AdminsController extends Controller
     {
         $genre = Genre::find($genre_id)->delete();
         return response()->json(['genre' => $genre],200);
+    }
+
+    public function addAdmin(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+        [
+            'first_name' => 'required|string|min:4|max:20',
+            'last_name'=> 'required|string|min:4|max:20',
+            'username'=> 'required|string|min:4|max:20',
+            'email'=> 'required|string|email|max:50',
+            'password'=> 'required|string|min:6|confirmed',
+            'password_confirmation' => 'required|string|min:6',
+            'profile' => 'required|mimes:jpg,png,svg,jpeg|max:100000'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $imageFilename = time().'.'.$request->profile->extension();
+
+        $request->profile->move(public_path('images/Profiles/'), $imageFilename);
+
+        $admin = Admin::create([
+            'first_name' => $request->get('first_name'),
+            'last_name' => $request->get('last_name'),
+            'username' => $request->get('username'),
+            'email' => $request->get('email'),
+            'password' => Hash::make($request->get('password_confirmation')),
+            'profile' => '/images/Profiles/' . $imageFilename,
+        ]);
+
+        return response()->json(['user'=> $admin],201);
+    }
+
+    public function getAllAdmin()
+    {
+        $admins = Admin::all();
+        return response()->json(['admins' => $admins],200);
     }
 }

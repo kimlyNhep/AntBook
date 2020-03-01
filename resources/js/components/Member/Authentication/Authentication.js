@@ -41,7 +41,6 @@ function Authentication() {
             <div className={classes.card}>
                 <LoginCard />
             </div>
-            <Link to='/Admin/Authentication'>Login As Admin</Link>
         </div>
     );
 }

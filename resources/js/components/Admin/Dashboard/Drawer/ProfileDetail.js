@@ -15,20 +15,28 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
-import GridListTile from '@material-ui/core/GridListTile';
 import GridList from '@material-ui/core/GridList';
-import axios from 'axios';
+import GridListTile from '@material-ui/core/GridListTile';
+import PhotoCamera from '@material-ui/icons/PhotoCamera';
 
 const useStyle = makeStyles(theme => ({
-    preview: {
-        width: 180,
-        height: 260
-    },
     gridList: {
         width: '100%',
         height: 260,
         display: 'flex',
         alignItems: 'center'
+    },
+    controls: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    hide: {
+        display: 'none'
+    },
+    avatar: {
+        minWidth: 200
     }
 }));
 
@@ -46,6 +54,8 @@ export default function DetailItem(props) {
         nonEditableUsername: true,
         nonEditableEmail: true
     });
+    const [selectedFile, setSelectedFile] = React.useState();
+    const [imagePreviewUrl, setImagePreviewUrl] = React.useState();
 
     const handleEditableFirstname = () => {
         setValues({
@@ -71,6 +81,39 @@ export default function DetailItem(props) {
     const handleEditableEmail = () => {
         setValues({ ...values, nonEditableEmail: !values.nonEditableEmail });
     };
+
+    const handleChange = prop => event => {
+        props.setUser({...props.user,[prop]: event.target.value});
+    }
+
+    const handlePreview = event => {
+        if (!event.target.files || event.target.files.length === 0) {
+            setSelectedFile(undefined);
+            return;
+        }
+
+        // I've kept this example simple by using the first image instead of multiple
+        setSelectedFile(event.target.files[0]);
+    };
+
+    React.useEffect(() => {
+        axios.get('/api/admin/info', {
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+            }
+        }).then(response => {
+            console.log(response);
+            props.setUser({...props.user,
+                    firstname: response.data.first_name,
+                    lastname: response.data.last_name,
+                    username: response.data.username,
+                    email: response.data.email,
+                    profile: response.data.profile
+            });
+            setImagePreviewUrl(response.data.profile);
+        }).catch(error=>console.log(error));
+    },[]);
+
 
     React.useEffect(() => {
         const timeout = setTimeout(() => {
@@ -109,37 +152,19 @@ export default function DetailItem(props) {
     }, [values.nonEditableEmail]);
 
     React.useEffect(() => {
-        axios.get('/api/admin/info', {
-            headers: {
-                Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
-            }
-        }).then(response => {
-            console.log(response);
-            props.setUser({...props.user,
-                    firstname: response.data.first_name,
-                    lastname: response.data.last_name,
-                    username: response.data.username,
-                    email: response.data.email,
-                    profile: response.data.profile
-            });
-        }).catch(error=>console.log(error));
-    },[]);
+        if (!selectedFile) {
+            setImagePreviewUrl(undefined);
+            return;
+        }
 
-    const handleFirstnameChange = (event) => {
-        props.setUser({...props.user,firstname: event.target.value})
-    }
+        const objectUrl = URL.createObjectURL(selectedFile);
+        setImagePreviewUrl(objectUrl);
+        props.setUser({...props.user,
+            profile: selectedFile
+    });
+        return () => URL.revokeObjectURL(objectUrl);
+    }, [selectedFile]);
 
-    const handleLastnameChange = (event) => {
-        props.setUser({...props.user,lastname: event.target.value})
-    }
-
-    const handleUsernameChange = (event) => {
-        props.setUser({...props.user,usertname: event.target.value})
-    }
-
-    const handleEmailChange = (event) => {
-        props.setUser({...props.user,email: event.target.value})
-    }
     return (
         <div>
             <Dialog
@@ -150,163 +175,184 @@ export default function DetailItem(props) {
             >
                 <DialogTitle id='alert-dialog-title'>{'Detail'}</DialogTitle>
                 <DialogContent>
-                        <Grid container spacing={2}>
-                            <Grid item xs={4}>
-                                <GridList
-                                    cellHeight={180}
-                                    cols={1}
-                                    className={classes.gridList}
-                                >
-                                    <GridListTile key=''>
-                                        <img src='/images/Profiles/default-profile.jpg' alt='' />
-                                    </GridListTile>
-                                </GridList>
-                            </Grid>
-                            <Grid item xs={8}>
-                                <FormControl
-                                    className={clsx(
-                                        classes.margin,
-                                        classes.textField
-                                    )}
-                                >
-                                    <InputLabel
-                                        htmlFor='standard-adornment-first-name'
-                                        className={classes.inputLabel}
-                                    >
-                                        First name
-                                    </InputLabel>
-                                    <Input
-                                        id='standard-adornment-first-name'
-                                        type='text'
-                                        value={props.user.firstname}
-                                        onChange={event => handleFirstnameChange(event)}
-                                        inputRef={inputRefFirstname}
-                                        readOnly={values.nonEditableFirstname}
-                                        endAdornment={
-                                            <InputAdornment position='end'>
-                                                <IconButton
-                                                    aria-label='toggle input editable'
-                                                    onClick={
-                                                        handleEditableFirstname
-                                                    }
-                                                >
-                                                    {values.nonEditableFirstname ? (
-                                                        <EditIcon />
-                                                    ) : (
-                                                        <CloseIcon />
-                                                    )}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        }
+                    <Grid container spacing={1}>
+                        <Grid item xs={4}>
+                            <GridList
+                                cellHeight={180}
+                                cols={1}
+                                className={classes.gridList}
+                            >
+                                <GridListTile key={props.user.username}>
+                                    <img
+                                        src={imagePreviewUrl}
+                                        alt={props.user.username}
+                                        className={classes.avatar}
                                     />
-                                </FormControl>
-                                <FormControl
-                                    className={clsx(
-                                        classes.margin,
-                                        classes.textField
-                                    )}
+                                </GridListTile>
+                            </GridList>
+                            <input
+                                accept='image/*'
+                                className={classes.hide}
+                                id='contained-button-file'
+                                multiple
+                                type='file'
+                                onChange={handlePreview}
+                            />
+                            <label htmlFor='contained-button-file'>
+                                <IconButton
+                                    color='primary'
+                                    aria-label='upload picture'
+                                    component='span'
                                 >
-                                    <InputLabel
-                                        htmlFor='standard-adornment-first-name'
-                                        className={classes.inputLabel}
-                                    >
-                                        Last name
-                                    </InputLabel>
-                                    <Input
-                                        id='standard-adornment-first-name'
-                                        type='text'
-                                        value={props.user.lastname}
-                                        onChange={event => handleLastnameChange(event)}
-                                        readOnly={values.nonEditableLastname}
-                                        inputRef={inputRefLastname}
-                                        endAdornment={
-                                            <InputAdornment position='end'>
-                                                <IconButton
-                                                    aria-label='toggle input editable'
-                                                    onClick={handleEditableLastname}
-                                                >
-                                                    {values.nonEditableLastname ? (
-                                                        <EditIcon />
-                                                    ) : (
-                                                        <CloseIcon />
-                                                    )}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        }
-                                    />
-                                </FormControl>
-                                <FormControl
-                                    className={clsx(
-                                        classes.margin,
-                                        classes.textField
-                                    )}
-                                >
-                                    <InputLabel
-                                        htmlFor='standard-adornment-first-name'
-                                        className={classes.inputLabel}
-                                    >
-                                        Username
-                                    </InputLabel>
-                                    <Input
-                                        id='standard-adornment-first-name'
-                                        type='text'
-                                        value={props.user.username}
-                                        onChange={event => handleUsernameChange(event)}
-                                        readOnly={values.nonEditableUsername}
-                                        inputRef={inputRefUsername}
-                                        endAdornment={
-                                            <InputAdornment position='end'>
-                                                <IconButton
-                                                    aria-label='toggle input editable'
-                                                    onClick={handleEditableUsername}
-                                                >
-                                                    {values.nonEditableUsername ? (
-                                                        <EditIcon />
-                                                    ) : (
-                                                        <CloseIcon />
-                                                    )}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        }
-                                    />
-                                </FormControl>
-                                <FormControl
-                                    className={clsx(
-                                        classes.margin,
-                                        classes.textField
-                                    )}
-                                >
-                                    <InputLabel
-                                        htmlFor='standard-adornment-first-name'
-                                        className={classes.inputLabel}
-                                    >
-                                        Email
-                                    </InputLabel>
-                                    <Input
-                                        id='standard-adornment-first-name'
-                                        type='email'
-                                        value={props.user.email}
-                                        onChange={event => handleEmailChange(event)}
-                                        inputRef={inputRefEmail}
-                                        readOnly={values.nonEditableEmail}
-                                        endAdornment={
-                                            <InputAdornment position='end'>
-                                                <IconButton
-                                                    aria-label='toggle input editable'
-                                                    onClick={handleEditableEmail}
-                                                >
-                                                    {values.nonEditableEmail ? (
-                                                        <EditIcon />
-                                                    ) : (
-                                                        <CloseIcon />
-                                                    )}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        }
-                                    />
-                                </FormControl>
-                            </Grid>
+                                    <PhotoCamera />
+                                </IconButton>
+                            </label>
                         </Grid>
+                        <Grid item xs={8} className={classes.controls}>
+                            <FormControl
+                                className={clsx(
+                                    classes.margin,
+                                    classes.textField
+                                )}
+                            >
+                                <InputLabel
+                                    htmlFor='standard-adornment-first-name'
+                                    className={classes.inputLabel}
+                                >
+                                    First name
+                                </InputLabel>
+                                <Input
+                                    id='standard-adornment-first-name'
+                                    type='text'
+                                    inputRef={inputRefFirstname}
+                                    readOnly={values.nonEditableFirstname}
+                                    value={props.user.firstname}
+                                    onChange={handleChange('firstname')}
+                                    endAdornment={
+                                        <InputAdornment position='end'>
+                                            <IconButton
+                                                aria-label='toggle input editable'
+                                                onClick={
+                                                    handleEditableFirstname
+                                                }
+                                            >
+                                                {values.nonEditableFirstname ? (
+                                                    <EditIcon />
+                                                ) : (
+                                                    <CloseIcon />
+                                                )}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    }
+                                />
+                            </FormControl>
+                            <FormControl
+                                className={clsx(
+                                    classes.margin,
+                                    classes.textField
+                                )}
+                            >
+                                <InputLabel
+                                    htmlFor='standard-adornment-first-name'
+                                    className={classes.inputLabel}
+                                >
+                                    Last name
+                                </InputLabel>
+                                <Input
+                                    id='standard-adornment-first-name'
+                                    type='text'
+                                    readOnly={values.nonEditableLastname}
+                                    inputRef={inputRefLastname}
+                                    value={props.user.lastname}
+                                    onChange={handleChange('lastname')}
+                                    endAdornment={
+                                        <InputAdornment position='end'>
+                                            <IconButton
+                                                aria-label='toggle input editable'
+                                                onClick={handleEditableLastname}
+                                            >
+                                                {values.nonEditableLastname ? (
+                                                    <EditIcon />
+                                                ) : (
+                                                    <CloseIcon />
+                                                )}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    }
+                                />
+                            </FormControl>
+                            <FormControl
+                                className={clsx(
+                                    classes.margin,
+                                    classes.textField
+                                )}
+                            >
+                                <InputLabel
+                                    htmlFor='standard-adornment-first-name'
+                                    className={classes.inputLabel}
+                                >
+                                    Username
+                                </InputLabel>
+                                <Input
+                                    id='standard-adornment-first-name'
+                                    type='text'
+                                    readOnly={values.nonEditableUsername}
+                                    inputRef={inputRefUsername}
+                                    value={props.user.username}
+                                    onChange={handleChange('username')}
+                                    endAdornment={
+                                        <InputAdornment position='end'>
+                                            <IconButton
+                                                aria-label='toggle input editable'
+                                                onClick={handleEditableUsername}
+                                            >
+                                                {values.nonEditableUsername ? (
+                                                    <EditIcon />
+                                                ) : (
+                                                    <CloseIcon />
+                                                )}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    }
+                                />
+                            </FormControl>
+                            <FormControl
+                                className={clsx(
+                                    classes.margin,
+                                    classes.textField
+                                )}
+                            >
+                                <InputLabel
+                                    htmlFor='standard-adornment-first-name'
+                                    className={classes.inputLabel}
+                                >
+                                    Email
+                                </InputLabel>
+                                <Input
+                                    id='standard-adornment-first-name'
+                                    type='email'
+                                    inputRef={inputRefEmail}
+                                    readOnly={values.nonEditableEmail}
+                                    value={props.user.email}
+                                    onChange={handleChange('email')}
+                                    endAdornment={
+                                        <InputAdornment position='end'>
+                                            <IconButton
+                                                aria-label='toggle input editable'
+                                                onClick={handleEditableEmail}
+                                            >
+                                                {values.nonEditableEmail ? (
+                                                    <EditIcon />
+                                                ) : (
+                                                    <CloseIcon />
+                                                )}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    }
+                                />
+                            </FormControl>
+                        </Grid>
+                    </Grid>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={props.handleSave} color='primary'>

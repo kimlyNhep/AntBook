@@ -147,14 +147,14 @@ export default function MiniDrawer(props) {
 
     const handleCloseProfile = () => {
         setViewProfile(false);
-        setUser(
-        {...user,
-            firstname: '',
-            lastname: '',
-            username: '',
-            email: '',
-            profile: ''
-        });
+        // setUser(
+        // {...user,
+        //     firstname: '',
+        //     lastname: '',
+        //     username: '',
+        //     email: '',
+        //     profile: ''
+        // });
     };
 
     const handleLogout = () => {
@@ -259,7 +259,7 @@ export default function MiniDrawer(props) {
                 <List>
                     <ListItem button key='Profile' onClick={handleOpenProfile}>
                         <ListItemIcon>
-                            <Avatar alt='kanao' src={user.profile} />
+                            <Avatar alt='Profile' src={user.profile} />
                         </ListItemIcon>
                         <ListItemText primary={user.username} />
                         {openProfile ? <ExpandLess /> : <ExpandMore />}

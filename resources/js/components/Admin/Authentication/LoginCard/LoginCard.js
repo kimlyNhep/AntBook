@@ -55,6 +55,9 @@ const useStyles = makeStyles(theme => ({
     },
     visibilityIcon: {
         color: '#757575'
+    },
+    link: {
+        textDecoration: 'none'
     }
 }));
 
@@ -171,7 +174,7 @@ export default function LoginCard(props) {
                 <Button size='small' color='secondary'>
                     Login
                 </Button>
-                <Link to='/Member/Authentication'>Login As Member</Link>
+                <Link to='/Member/Authentication' className={classes.link}>Member</Link>
             </CardActions>
         </Card>
     );
