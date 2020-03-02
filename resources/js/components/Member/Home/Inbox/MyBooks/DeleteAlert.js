@@ -15,7 +15,7 @@ export default function AlertDialog(props) {
         }).then(response => {
             // props.loadlist();
             props.handleClose();
-            // location.reload();
+            location.reload();
             console.log(response.data);
         }).catch(error => console.log(error.response));
     }

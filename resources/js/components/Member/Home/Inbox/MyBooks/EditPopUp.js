@@ -116,7 +116,7 @@ function EditPopUp(props) {
             console.log(response.data)
 
             props.handleClose();
-            // location.reload();
+            location.reload();
         }).catch(error => console.log(error.response));
 
     }

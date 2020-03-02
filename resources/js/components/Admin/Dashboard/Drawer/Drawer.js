@@ -197,6 +197,7 @@ export default function MiniDrawer(props) {
             response => {
                 console.log(response.data)
                 handleLoadGenre();
+                location.reload();
             }
         ).catch(error => console.log(error.response));
     }
@@ -213,6 +214,7 @@ export default function MiniDrawer(props) {
             }
         ).then(response => {
             handleLoadGenre();
+            location.reload();
         }).catch(error => console.log(error));
         handleCloseGenre();
     }
@@ -233,7 +235,7 @@ export default function MiniDrawer(props) {
             }
         ).then(response => {
             // return console.log(response.data);
-
+            location.reload();
             handleLoadGenre();
         }).catch(error => console.log(error));
         handleCloseEditGenre();

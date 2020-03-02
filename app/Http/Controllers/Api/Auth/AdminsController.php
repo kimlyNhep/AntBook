@@ -257,7 +257,7 @@ class AdminsController extends Controller
             'resource' => '/Files/Stocks/' . $fileType,
         ]);
 
-        return response()->json(['approvedBook' => $book],201);
+        return response()->json(['tmpbooks' => $book],201);
     }
 
     public function rejectedBook($book_id)
