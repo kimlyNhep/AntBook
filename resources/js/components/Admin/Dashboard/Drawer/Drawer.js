@@ -187,31 +187,6 @@ export default function MiniDrawer(props) {
         setViewProfile(false);
     };
 
-    const handleSaveProfile = () => {
-
-        let fd = new FormData();
-        fd.append('first_name',user.firstname);
-        fd.append('last_name',user.lastname);
-        fd.append('username',user.username);
-        fd.append('email',user.email);
-        fd.append('profile',user.profile,user.profile.name);
-
-        axios.post('/api/admin/Update',
-            fd,
-            {
-                headers: {
-                    'content-type': `multipart/form-data;`,
-                    Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
-                }
-            }
-        ).then(response => {
-            console.log(response);
-        }).catch(error => console.log(error));
-
-        handleCloseProfile();
-    }
-
-
     const handleDeleteGenre = (_id) => {
         axios.delete(`api/admin/Genre/delete/${_id}`,
         {
@@ -537,7 +512,6 @@ export default function MiniDrawer(props) {
                 <ProfileDetail
                     open={openProfile}
                     handleClose={handleCloseProfile}
-                    handleSave={handleSaveProfile}
                     user={user}
                     setUser={setUser}
                 />

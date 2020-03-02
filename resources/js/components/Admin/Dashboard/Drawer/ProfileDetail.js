@@ -56,6 +56,37 @@ export default function DetailItem(props) {
     });
     const [selectedFile, setSelectedFile] = React.useState();
     const [imagePreviewUrl, setImagePreviewUrl] = React.useState();
+    const [admin,setAdmin] = React.useState({
+        firstname: props.user.firstname,
+        lastname: props.user.lastname,
+        username: props.user.username,
+        email: props.user.email,
+        profile: props.user.profile
+    })
+
+    const handleUpdateInfor = () => {
+        let fd = new FormData();
+        fd.append('first_name',admin.firstname);
+        fd.append('last_name',admin.lastname);
+        fd.append('username',admin.username);
+        fd.append('email',admin.email);
+        fd.append('profile',admin.profile,admin.profile.name);
+
+        axios.post('/api/admin/Update',
+            fd,
+            {
+                headers: {
+                    'content-type': `multipart/form-data;`,
+                    Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+                }
+            }
+        ).then(response => {
+            console.log(response);
+            location.reload();
+        }).catch(error => console.log(error));
+
+        props.handleClose();
+    }
 
     const handleEditableFirstname = () => {
         setValues({
@@ -83,7 +114,7 @@ export default function DetailItem(props) {
     };
 
     const handleChange = prop => event => {
-        props.setUser({...props.user,[prop]: event.target.value});
+        setAdmin({...admin,[prop]: event.target.value});
     }
 
     const handlePreview = event => {
@@ -159,7 +190,7 @@ export default function DetailItem(props) {
 
         const objectUrl = URL.createObjectURL(selectedFile);
         setImagePreviewUrl(objectUrl);
-        props.setUser({...props.user,
+        setAdmin({...admin,
             profile: selectedFile
     });
         return () => URL.revokeObjectURL(objectUrl);
@@ -185,7 +216,7 @@ export default function DetailItem(props) {
                                 <GridListTile key={props.user.username}>
                                     <img
                                         src={imagePreviewUrl}
-                                        alt={props.user.username}
+                                        alt={admin.username}
                                         className={classes.avatar}
                                     />
                                 </GridListTile>
@@ -226,7 +257,7 @@ export default function DetailItem(props) {
                                     type='text'
                                     inputRef={inputRefFirstname}
                                     readOnly={values.nonEditableFirstname}
-                                    value={props.user.firstname}
+                                    value={admin.firstname}
                                     onChange={handleChange('firstname')}
                                     endAdornment={
                                         <InputAdornment position='end'>
@@ -263,7 +294,7 @@ export default function DetailItem(props) {
                                     type='text'
                                     readOnly={values.nonEditableLastname}
                                     inputRef={inputRefLastname}
-                                    value={props.user.lastname}
+                                    value={admin.lastname}
                                     onChange={handleChange('lastname')}
                                     endAdornment={
                                         <InputAdornment position='end'>
@@ -298,7 +329,7 @@ export default function DetailItem(props) {
                                     type='text'
                                     readOnly={values.nonEditableUsername}
                                     inputRef={inputRefUsername}
-                                    value={props.user.username}
+                                    value={admin.username}
                                     onChange={handleChange('username')}
                                     endAdornment={
                                         <InputAdornment position='end'>
@@ -333,7 +364,7 @@ export default function DetailItem(props) {
                                     type='email'
                                     inputRef={inputRefEmail}
                                     readOnly={values.nonEditableEmail}
-                                    value={props.user.email}
+                                    value={admin.email}
                                     onChange={handleChange('email')}
                                     endAdornment={
                                         <InputAdornment position='end'>
@@ -355,7 +386,7 @@ export default function DetailItem(props) {
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={props.handleSave} color='primary'>
+                    <Button onClick={handleUpdateInfor} color='primary'>
                         <SaveIcon />
                         Save
                     </Button>

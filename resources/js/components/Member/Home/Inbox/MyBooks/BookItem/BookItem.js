@@ -1,17 +1,25 @@
 import React from 'react';
 import InfoIcon from '@material-ui/icons/Info';
+import EditIcon from '@material-ui/icons/EditOutlined';
 import { makeStyles } from '@material-ui/core/styles';
 import DetailBook from '../DetailItem';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import PDF from '../../../../../../../../public/Files/Books/1582874763.pdf';
 import axios from 'axios';
+import DeleteIcon from '@material-ui/icons/DeleteOutline';
+import EditComponent from '../EditPopUp';
+import DeleteComponent from '../DeleteAlert';
 
 const useStyles = makeStyles(theme => ({
     icons: { color: 'rgba(255, 255, 255, 0.54)' },
     actionTools: {
         display: 'flex',
         justifyContent: 'space-between'
+    },
+    editTools: {
+        position: "absolute",
+        bottom: '1%',
     }
 }));
 
@@ -19,6 +27,8 @@ function BookItem(props) {
     const classes = useStyles();
     const [viewBook, setViewBook] = React.useState(false);
     const [selectedBook, setSelectedBook] = React.useState();
+    const [openEdit,setOpenEdit] = React.useState(false);
+    const [openDelete,setOpenDelete] = React.useState(false);
 
     const handleViewBook = book => {
         setViewBook(true);
@@ -27,32 +37,29 @@ function BookItem(props) {
 
     const handleCloseViewBook = () => {
         setViewBook(false);
-        setSelectedBook(null);
+        // setSelectedBook(null);
     };
+
+    const handleCloseEdit = () => {
+        setOpenEdit(false);
+    }
+
     const handleOpenPDF = source => {
         window.open(source);
     };
 
-    const handleEditBook = (newbook) => {
-        var data = new FormData();
-        data.append('title',newbook.title);
-        // fd.append('author',newbook.author);
-        // fd.append('genre_id',newbook.genre_id);
-        // fd.append('pages',newbook.pages);
-        // fd.append('images',newbook.images,newbook.images.name);
-        // fd.append('resource',newbook.resource,newbook.resource.name);
+    const handleOpenEdit = book => {
+        setOpenEdit(true);
+        setSelectedBook(book);
+    }
 
-        // axios.put(`/api/user/Book/Update/${props.book.id}`,fd,
-        // {
-        //     headers: {
-        //         'content-type': `multipart/form-data;`,
-        //         Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
-        //     }
-        // }).then(response =>
-        //     console.log(response.data)
-        // ).catch(error => console.log(error.response));
-        console.log(data);
+    const handleOpenDelete = book => {
+        setOpenDelete(true);
+        setSelectedBook(book);
+    }
 
+    const handleCloseDelete = () => {
+        setOpenDelete(false);
     }
 
     return (
@@ -70,6 +77,14 @@ function BookItem(props) {
                 <IconButton onClick={() => handleViewBook(props.book)}>
                     <InfoIcon className={classes.icons} />
                 </IconButton>
+                <IconButton onClick={() => handleOpenDelete(props.book)}>
+                    <DeleteIcon color='secondary'/>
+                </IconButton>
+            </div>
+            <div className={classes.editTools}>
+                <IconButton onClick={() => handleOpenEdit(props.book)}>
+                    <EditIcon color='secondary'/>
+                </IconButton>
                 <Button
                     color='secondary'
                     onClick={() => handleOpenPDF(props.book.resource)}
@@ -81,9 +96,26 @@ function BookItem(props) {
                 <DetailBook
                     open={viewBook}
                     handleClose={handleCloseViewBook}
-                    handleSave={handleEditBook}
                     item={selectedBook}
                     bId={props.book.id}
+                />
+            )}
+            {openEdit && (
+                <EditComponent
+                    open={openEdit}
+                    handleClose={handleCloseEdit}
+                    oldBook={selectedBook}
+                    bId={props.book.id}
+
+                />
+            )}
+            {openDelete && (
+                <DeleteComponent
+                    open={openDelete}
+                    handleClose={handleCloseDelete}
+                    Book={selectedBook}
+                    bId={props.book.id}
+
                 />
             )}
         </div>

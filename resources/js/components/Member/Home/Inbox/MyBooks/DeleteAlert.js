@@ -3,8 +3,23 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import axios from 'axios';
 
 export default function AlertDialog(props) {
+
+    const handleDelete = () => {
+        axios.delete(`/api/user/Book/Delete/${props.bId}`,{
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+            }
+        }).then(response => {
+            // props.loadlist();
+            props.handleClose();
+            // location.reload();
+            console.log(response.data);
+        }).catch(error => console.log(error.response));
+    }
+
     return (
         <div>
             <Dialog
@@ -21,7 +36,7 @@ export default function AlertDialog(props) {
                         Disagree
                     </Button>
                     <Button
-                        onClick={props.handleClose}
+                        onClick={handleDelete}
                         color='primary'
                         autoFocus
                     >

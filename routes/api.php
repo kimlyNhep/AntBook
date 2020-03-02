@@ -47,5 +47,6 @@ Route::group(['middleware' => 'auth:api'],function ()
     Route::get('/user/logout','Api\Auth\Userscontroller@logout');
     Route::get('/user/info','Api\Auth\Userscontroller@info');
     Route::post('/user/Update','Api\Auth\Userscontroller@updateInfo');
-    Route::put('/user/Book/Update/{book_id}','Api\Auth\Userscontroller@updateBook');
+    Route::post('/user/Book/Update','Api\Auth\Userscontroller@updateBook');
+    Route::delete('/user/Book/Delete/{book_id}','Api\Auth\Userscontroller@deleteBook');
 });

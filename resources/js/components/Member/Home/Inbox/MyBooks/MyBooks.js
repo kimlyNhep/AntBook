@@ -147,26 +147,6 @@ function Books(props) {
         setDisplayData([AddCard,...bookData]);
     },[bookData]);
 
-    const handleAddBookSave = () => {
-        let fd = new FormData();
-        fd.append('title',book.title);
-        fd.append('author',book.author);
-        fd.append('genre_id',book.genre_id);
-        fd.append('pages',book.pages);
-        fd.append('images',book.images,book.images.name);
-        fd.append('resource',book.resource,book.resource.name);
-
-        axios.post('/api/user/addBook',fd,{
-            headers: {
-                'content-type': `multipart/form-data;`,
-                Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
-            }
-        }).then(response => {
-            handleAddBookClose()
-            handleOnLoad();
-        }).catch(error => console.log(error.response));
-    }
-
     React.useEffect(() => {
         handleOnLoad();
     },[])
@@ -197,10 +177,6 @@ function Books(props) {
 
     const ArrowLeft = Arrow({ text: '<', className: 'arrow-prev' });
     const ArrowRight = Arrow({ text: '>', className: 'arrow-next' });
-
-    // React.useEffect(() => {
-    //     console.log(displayData);
-    // });
 
     return (
         <Paper className={classes.paper}>
@@ -243,8 +219,8 @@ function Books(props) {
                 <div>No Data to load</div>
             )}
             {addBook && (
-                <AddPopUp open={addBook} handleClose={handleAddBookClose} handleSave={handleAddBookSave}
-                book={book} genre_id={props.gId} setBook={setBook}/>
+                <AddPopUp open={addBook} handleClose={handleAddBookClose}
+                book={book} genre_id={props.gId} setBook={setBook} />
             )}
         </Paper>
     );

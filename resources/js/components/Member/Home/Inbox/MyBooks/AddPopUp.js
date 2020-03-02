@@ -19,6 +19,8 @@ import Paper from '@material-ui/core/Paper';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBook } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
 
 const useStyles = makeStyles(theme => ({
     formControl: {
@@ -39,46 +41,39 @@ const useStyles = makeStyles(theme => ({
     preview: {
         width: 180,
         height: 210
-    }
+    },
+    gridList: {
+        width: '100%',
+        height: 260,
+        display: 'flex',
+        alignItems: 'center'
+    },
 }));
 
 function AddPopUp(props) {
     const classes = useStyles();
-    const [owner, setOwner] = React.useState('');
-    const [genreList, setGenreList] = React.useState([]);
-    const [selectGenre,setSelectedGenre] = React.useState('');
+    // const [genreList, setGenreList] = React.useState([]);
     const [selectedFile, setSelectedFile] = React.useState();
     const [imagePreviewUrl, setImagePreviewUrl] = React.useState();
-
     const [selectedAttachFile, setSelectedAttachFile] = React.useState();
+    const [book,setBook] = React.useState({
+        title: '',
+        pages: 0,
+        genre_id: 0,
+        images: null,
+        resource: null,
+        author: ''
+    });
 
-    const handleGenreChange = event => {
-        props.setBook({...props.book,genre_id: event.target.value});
-        setSelectedGenre(event.target.value);
-    };
-
-    const handleAuthorChange = event => {
-        props.setBook({...props.book,author: event.target.value});
+    const handleChange = prop => event => {
+        setBook({...book,[prop]: event.target.value});
     }
-
-    const handlePagesChange = event => {
-        props.setBook({...props.book,pages: event.target.value});
-    }
-
-    const handleTitleChange = event => {
-        props.setBook({...props.book,title: event.target.value});
-    }
-
-    const handleOwnerChange = event => {
-        setOwner(event.target.value);
-    };
 
     const handlePreview = event => {
         if (!event.target.files || event.target.files.length === 0) {
             setSelectedFile(undefined);
             return;
         }
-
         // I've kept this example simple by using the first image instead of multiple
         setSelectedFile(event.target.files[0]);
     };
@@ -88,10 +83,30 @@ function AddPopUp(props) {
             setSelectedAttachFile(undefined);
             return;
         }
-
         // I've kept this example simple by using the first image instead of multiple
         setSelectedAttachFile(event.target.files[0]);
     };
+
+    const handleAddBook = () => {
+        let fd = new FormData();
+        fd.append('title',book.title);
+        fd.append('author',book.author);
+        fd.append('genre_id',book.genre_id);
+        fd.append('pages',book.pages);
+        fd.append('images',book.images,book.images.name);
+        fd.append('resource',book.resource,book.resource.name);
+
+        axios.post('/api/user/addBook',fd,{
+            headers: {
+                'content-type': `multipart/form-data;`,
+                Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+            }
+        }).then(response => {
+            // props.loadlist();
+            props.handleClose();
+            location.reload();
+        }).catch(error => console.log(error.response));
+    }
 
     useEffect(() => {
         if (!selectedFile) {
@@ -101,7 +116,7 @@ function AddPopUp(props) {
 
         const objectUrl = URL.createObjectURL(selectedFile);
         setImagePreviewUrl(objectUrl);
-        props.setBook({...props.book,images: selectedFile});
+        setBook({...book,images: selectedFile});
         return () => URL.revokeObjectURL(objectUrl);
     }, [selectedFile]);
 
@@ -110,7 +125,7 @@ function AddPopUp(props) {
             setSelectedAttachFile(undefined);
             return;
         }
-        props.setBook({...props.book,resource: selectedAttachFile});
+        setBook({...book,resource: selectedAttachFile});
         console.log(selectedAttachFile);
     }, [selectedAttachFile]);
 
@@ -121,7 +136,7 @@ function AddPopUp(props) {
             }
         }).then(response => setGenreList(response.data.genres)
         ).catch(error =>  console.log(error.response));
-        props.setBook({...props.book,genre_id: props.genre_id});
+        setBook({...book,genre_id: props.genre_id});
     },[]);
 
     return (
@@ -145,8 +160,8 @@ function AddPopUp(props) {
                                 label='Title'
                                 type='text'
                                 fullWidth
-                                value={props.book.title}
-                                onChange={handleTitleChange}
+                                value={book.title}
+                                onChange={handleChange('title')}
                             />
                             <TextField
                                 margin='dense'
@@ -154,8 +169,8 @@ function AddPopUp(props) {
                                 label='Number of Pages'
                                 type='number'
                                 fullWidth
-                                value={props.book.pages}
-                                onChange={handlePagesChange}
+                                value={book.pages}
+                                onChange={handleChange('pages')}
                             />
                             <TextField
                                 margin='dense'
@@ -163,8 +178,8 @@ function AddPopUp(props) {
                                 label='Author'
                                 type='text'
                                 fullWidth
-                                value={props.book.author}
-                                onChange={handleAuthorChange}
+                                value={book.author}
+                                onChange={handleChange('author')}
                             />
                             {selectedAttachFile && (
                                 <TextField
@@ -180,16 +195,18 @@ function AddPopUp(props) {
                             )}
                         </Grid>
                         <Grid item xs={4}>
-                            <Paper variant='outlined' className={classes.paper}>
-                                {selectedFile && (
+                        <GridList
+                                cellHeight={180}
+                                cols={1}
+                                className={classes.gridList}
+                            >
+                                <GridListTile key={book.title}>
                                     <img
-                                        id='preview'
-                                        alt='profile'
                                         src={imagePreviewUrl}
-                                        className={classes.preview}
+                                        alt={book.title}
                                     />
-                                )}
-                            </Paper>
+                                </GridListTile>
+                            </GridList>
                             <input
                                 accept='image/*'
                                 className={classes.hide}
@@ -232,7 +249,7 @@ function AddPopUp(props) {
                     <Button onClick={props.handleClose} color='primary'>
                         Cancel
                     </Button>
-                    <Button onClick={props.handleSave} color='primary'>
+                    <Button onClick={handleAddBook} color='primary'>
                         Added
                     </Button>
                 </DialogActions>

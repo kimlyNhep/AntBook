@@ -151,41 +151,140 @@ class UsersController extends Controller
         return response()->json(['success'=> $user],200);
     }
 
-    public function updateBook(Request $request,$book_id)
+    public function updateBook(Request $request)
     {
         $validator = Validator::make($request->all(),
         [
             'title' => 'required|string|min:4|max:50',
             'author'=> 'required|string|min:4|max:20',
             'pages'=> 'required|numeric',
-            'images' => 'required|mimes:jpg,png,svg,jpeg|max:10000000',
-            'resource' => 'required|mimes:pdf|max:10000000'
+            'images' => 'mimes:jpg,png,svg,jpeg|max:10000000',
+            'resource' => 'mimes:pdf|max:10000000'
         ]);
 
         if($validator->fails()){
             return response()->json($validator->errors()->toJson(), 400);
         }
 
-        $imageFilename = time().'.'.$request->images->extension();
-
-        $request->images->move(public_path('/images/Books/'), $imageFilename);
-
-        $resourceFilename = time().'.'.$request->resource->extension();
-
-        $request->resource->move(public_path('/Files/Books/'), $resourceFilename);
-
         $user_id = $this->info()->id;
+        if($request->has('images') && $request->has('resource')) {
+            $imageFilename = time().'.'.$request->images->extension();
+            $request->images->move(public_path('/images/Books/'), $imageFilename);
+            $image = public_path('/images/Books/'.$imageFilename);
+            $imageType = time().'.'.\File::extension($image);
+            \File::copy($image,public_path('/images/Stocks/' . $imageType));
 
-        $book = TmpBook::find($book_id)->update([
-            'title' => $request->get('title'),
-            'author' => $request->get('author'),
-            'genre_id' => $request->get('genre_id'),
-            'pages' => $request->get('pages'),
-            'user_id' => $user_id,
-            'images' => '/images/Books/' . $imageFilename,
-            'resource' => '/Files/Books/' . $resourceFilename,
-        ]);
+            $resourceFilename = time().'.'.$request->resource->extension();
+            $request->resource->move(public_path('/Files/Books/'), $resourceFilename);
+            $file = public_path('/Files/Books/'.$resourceFilename);
+            $fileType = time().'.'.\File::extension($file);
+            \File::copy($file,public_path('/Files/Stocks/' . $fileType));
 
-        return response()->json(['success' => true],200);
+            $title = TmpBook::where('id',$request->id)->first()->title;
+
+            TmpBook::find($request->id)->update([
+                'title' => $request->get('title'),
+                'author' => $request->get('author'),
+                'genre_id' => $request->get('genre_id'),
+                'pages' => $request->get('pages'),
+                'user_id' => $user_id,
+                'images' => '/images/Books/' . $imageFilename,
+                'resource' => '/Files/Books/' . $resourceFilename,
+            ]);
+
+            $book = Book::where('title','=',$title)->update([
+                'title' => $request->get('title'),
+                'author' => $request->get('author'),
+                'genre_id' => $request->get('genre_id'),
+                'pages' => $request->get('pages'),
+                'user_id' => $user_id,
+                'images' => '/images/Stocks/' . $imageFilename,
+                'resource' => '/Files/Stocks/' . $resourceFilename,
+            ]);
+        }
+        else if($request->has('images')) {
+            $imageFilename = time().'.'.$request->images->extension();
+            $request->images->move(public_path('/images/Books/'), $imageFilename);
+            $image = public_path('/images/Books/'.$imageFilename);
+            $imageType = time().'.'.\File::extension($image);
+            \File::copy($image,public_path('/images/Stocks/' . $imageType));
+
+            $title = TmpBook::where('id',$request->id)->first()->title;
+
+            TmpBook::find($request->id)->update([
+                'title' => $request->get('title'),
+                'author' => $request->get('author'),
+                'genre_id' => $request->get('genre_id'),
+                'pages' => $request->get('pages'),
+                'user_id' => $user_id,
+                'images' => '/images/Books/' . $imageFilename,
+            ]);
+
+            $book = Book::where('title','=',$title)->update([
+                'title' => $request->get('title'),
+                'author' => $request->get('author'),
+                'genre_id' => $request->get('genre_id'),
+                'pages' => $request->get('pages'),
+                'user_id' => $user_id,
+                'images' => '/images/Stocks/' . $imageFilename,
+            ]);
+
+        }
+        else if($request->has('resource')) {
+            $resourceFilename = time().'.'.$request->resource->extension();
+            $request->resource->move(public_path('/Files/Books/'), $resourceFilename);
+            $file = public_path('/Files/Books/'.$resourceFilename);
+            $fileType = time().'.'.\File::extension($file);
+            \File::copy($file,public_path('/Files/Stocks/' . $fileType));
+
+            $title = TmpBook::where('id',$request->id)->first()->title;
+
+            TmpBook::find($request->id)->update([
+                'title' => $request->get('title'),
+                'author' => $request->get('author'),
+                'genre_id' => $request->get('genre_id'),
+                'pages' => $request->get('pages'),
+                'user_id' => $user_id,
+                'resource' => '/Files/Books/' . $resourceFilename,
+            ]);
+
+            $book = Book::where('title','=',$title)->update([
+                'title' => $request->get('title'),
+                'author' => $request->get('author'),
+                'genre_id' => $request->get('genre_id'),
+                'pages' => $request->get('pages'),
+                'user_id' => $user_id,
+                'resource' => '/Files/Books/' . $resourceFilename,
+            ]);
+        }
+        else {
+            $title = TmpBook::where('id',$request->id)->first()->title;
+            TmpBook::find($request->id)->update([
+                'title' => $request->get('title'),
+                'author' => $request->get('author'),
+                'genre_id' => $request->get('genre_id'),
+                'pages' => $request->get('pages'),
+                'user_id' => $user_id,
+            ]);
+
+            $book = Book::where('title','=',$title)->update([
+                'title' => $request->get('title'),
+                'author' => $request->get('author'),
+                'genre_id' => $request->get('genre_id'),
+                'pages' => $request->get('pages'),
+                'user_id' => $user_id,
+            ]);
+        }
+
+        return response()->json(['success' => $title],200);
+        // return $request->images;
+    }
+
+    public function deleteBook($book_id)
+    {
+        $title = TmpBook::where('id',$book_id)->first()->title;
+        $book = TmpBook::find($book_id)->delete();
+        Book::where('title','=',$title)->delete();
+        return response()->json(['succuss' => $title],200);
     }
 }

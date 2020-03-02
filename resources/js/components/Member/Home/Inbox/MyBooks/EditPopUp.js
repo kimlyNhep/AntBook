@@ -18,6 +18,9 @@ import AttachFile from '@material-ui/icons/AttachFile';
 import Paper from '@material-ui/core/Paper';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBook } from '@fortawesome/free-solid-svg-icons';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
+import {useHistory} from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
     formControl: {
@@ -38,27 +41,40 @@ const useStyles = makeStyles(theme => ({
     preview: {
         width: 180,
         height: 210
-    }
+    },
+    gridList: {
+        width: '100%',
+        height: 260,
+        display: 'flex',
+        alignItems: 'center'
+    },
 }));
 
 function EditPopUp(props) {
     const classes = useStyles();
-    const [owner, setOwner] = React.useState(props.oldBook.owner);
-    const [genre, setGenre] = React.useState(props.oldBook.genre);
+    const history = useHistory();
+    const [owner, setOwner] = React.useState();
+    const [selectGenre, setSelectGenre] = React.useState(props.oldBook.genre_id);
+    const [genreList,setGenreList] = React.useState([]);
     const [selectedFile, setSelectedFile] = React.useState();
     const [imagePreviewUrl, setImagePreviewUrl] = React.useState();
-
     const [selectedAttachFile, setSelectedAttachFile] = React.useState(
         props.oldBook.source
     );
+    const [book,setBook] = React.useState({
+        id: props.bId,
+        title: props.oldBook.title,
+        author: props.oldBook.author,
+        genre_id: props.oldBook.genre_id,
+        user: props.oldBook.user,
+        pages: props.oldBook.pages,
+        images: null,
+        resource: null
+    });
 
-    const handleGenreChange = event => {
-        setGenre(event.target.value);
-    };
-
-    const handleOwnerChange = event => {
-        setOwner(event.target.value);
-    };
+    const handleChange = prop => event => {
+        setBook({...book,[prop]: event.target.value});
+    }
 
     const handlePreview = event => {
         if (!event.target.files || event.target.files.length === 0) {
@@ -80,6 +96,31 @@ function EditPopUp(props) {
         setSelectedAttachFile(event.target.files[0]);
     };
 
+    const handleUpdate = () => {
+        let fd = new FormData();
+        fd.append('id',book.id);
+        fd.append('title',book.title);
+        fd.append('author',book.author);
+        fd.append('genre_id',book.genre_id);
+        fd.append('pages',book.pages);
+        if(book.images != null) fd.append('images',book.images,book.images.name);
+        if(book.resource != null) fd.append('resource',book.resource,book.resource.name);
+
+        axios.post(`/api/user/Book/Update`,fd,
+        {
+            headers: {
+                'content-type': `multipart/form-data;`,
+                Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+            }
+        }).then(response => {
+            console.log(response.data)
+
+            props.handleClose();
+            // location.reload();
+        }).catch(error => console.log(error.response));
+
+    }
+
     useEffect(() => {
         if (!selectedFile) {
             setImagePreviewUrl(undefined);
@@ -88,7 +129,8 @@ function EditPopUp(props) {
 
         const objectUrl = URL.createObjectURL(selectedFile);
         setImagePreviewUrl(objectUrl);
-
+        setBook({...book,images: selectedFile});
+        console.log('old',props.oldBook.images,'new',selectedFile.name);
         return () => URL.revokeObjectURL(objectUrl);
     }, [selectedFile]);
 
@@ -98,8 +140,24 @@ function EditPopUp(props) {
             return;
         }
 
-        console.log(selectedAttachFile);
+        setBook({...book,resource: selectedAttachFile});
     }, [selectedAttachFile]);
+
+    useEffect(() => {
+        axios.get('/api/user/genre/all',
+        {
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
+            }
+        }).then(response => {
+            setGenreList([...response.data.genres]);
+        })
+        .catch(error => console.log(error));
+        console.log('editBook',props.oldBook)
+        setImagePreviewUrl(props.oldBook.images);
+    },[]);
+
+    useEffect(() => console.log(book),[book]);
 
     return (
         <div>
@@ -122,25 +180,26 @@ function EditPopUp(props) {
                                 label='Title'
                                 type='text'
                                 fullWidth
-                                value={props.oldBook.title}
+                                value={book.title}
+                                onChange={handleChange('title')}
                             />
                             <TextField
-                                autoFocus
                                 margin='dense'
                                 id='pages'
                                 label='Number of Pages'
                                 type='number'
                                 fullWidth
-                                value={props.oldBook.pages}
+                                value={book.pages}
+                                onChange={handleChange('pages')}
                             />
                             <TextField
-                                autoFocus
                                 margin='dense'
                                 id='author'
                                 label='Author'
                                 type='text'
                                 fullWidth
-                                value={props.oldBook.author}
+                                value={book.author}
+                                onChange={handleChange('author')}
                             />
                             <FormControl className={classes.formControl}>
                                 <InputLabel id='select-genre-label'>
@@ -149,30 +208,10 @@ function EditPopUp(props) {
                                 <Select
                                     labelId='select-genre-label'
                                     id='select-genre'
-                                    value={genre}
-                                    onChange={handleGenreChange}
+                                    value={book.genre_id}
+                                    onChange={handleChange('genre_id')}
                                 >
-                                    <MenuItem value='drama'>Drama</MenuItem>
-                                    <MenuItem value='advanture'>
-                                        Advanture
-                                    </MenuItem>
-                                    <MenuItem value='comedy'>Comedy</MenuItem>
-                                </Select>
-                            </FormControl>
-                            <FormControl className={classes.formControl}>
-                                <InputLabel id='demo-simple-select-label'>
-                                    Owner
-                                </InputLabel>
-                                <Select
-                                    labelId='demo-simple-select-label'
-                                    id='demo-simple-select'
-                                    value={owner}
-                                    // defaultValue={props.oldBook.owner}
-                                    onChange={handleOwnerChange}
-                                >
-                                    <MenuItem value='kimly'>Kimly</MenuItem>
-                                    <MenuItem value='rotha'>Rotha</MenuItem>
-                                    <MenuItem value='chetha'>Chetha</MenuItem>
+                                    {genreList.map(genre => <MenuItem value={genre.id} key={genre.title}>{genre.title}</MenuItem>)}
                                 </Select>
                             </FormControl>
                             {selectedAttachFile && (
@@ -180,7 +219,7 @@ function EditPopUp(props) {
                                     id='file'
                                     type='text'
                                     fullWidth
-                                    value={selectedAttachFile}
+                                    value={selectedAttachFile.name}
                                     InputProps={{
                                         readOnly: true
                                     }}
@@ -189,16 +228,18 @@ function EditPopUp(props) {
                             )}
                         </Grid>
                         <Grid item xs={4}>
-                            <Paper variant='outlined' className={classes.paper}>
-                                {selectedFile && (
+                            <GridList
+                                cellHeight={180}
+                                cols={1}
+                                className={classes.gridList}
+                            >
+                                <GridListTile key={book.title}>
                                     <img
-                                        id='preview'
-                                        alt='profile'
                                         src={imagePreviewUrl}
-                                        className={classes.preview}
+                                        alt={book.title}
                                     />
-                                )}
-                            </Paper>
+                                </GridListTile>
+                            </GridList>
                             <input
                                 accept='image/*'
                                 className={classes.hide}
@@ -241,7 +282,7 @@ function EditPopUp(props) {
                     <Button onClick={props.handleClose} color='primary'>
                         Cancel
                     </Button>
-                    <Button onClick={props.handleClose} color='primary'>
+                    <Button onClick={handleUpdate} color='primary'>
                         Apply
                     </Button>
                 </DialogActions>

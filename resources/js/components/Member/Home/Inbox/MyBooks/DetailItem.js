@@ -32,7 +32,9 @@ const useStyle = makeStyles(theme => ({
 
 export default function DetailItem(props) {
     const classes = useStyle();
-    const [openEdit,setOpenEdit] = React.useState(false);
+    const [selectedFile, setSelectedFile] = React.useState();
+    const [imagePreviewUrl, setImagePreviewUrl] = React.useState();
+    const [selectedAttachFile, setSelectedAttachFile] = React.useState();
     const [book,setBook] = React.useState({
         title: '',
         pages: 0,
@@ -42,58 +44,6 @@ export default function DetailItem(props) {
         images: null,
         resource: null
     })
-    const [selectedFile, setSelectedFile] = React.useState();
-    const [imagePreviewUrl, setImagePreviewUrl] = React.useState();
-    const [selectedAttachFile, setSelectedAttachFile] = React.useState();
-
-    const handleOpenEdit = () => {
-        setOpenEdit(true);
-    }
-
-    const handleChange = prop => event => {
-        setBook({...book,[prop]: event.target.value});
-    }
-
-    const handlePreview = event => {
-        if (!event.target.files || event.target.files.length === 0) {
-            setSelectedFile(undefined);
-            return;
-        }
-
-        // I've kept this example simple by using the first image instead of multiple
-        setSelectedFile(event.target.files[0]);
-    };
-
-    const handleAttachFile = event => {
-        if (!event.target.files || event.target.files.length === 0) {
-            setSelectedAttachFile(undefined);
-            return;
-        }
-
-        // I've kept this example simple by using the first image instead of multiple
-        setSelectedAttachFile(event.target.files[0]);
-    };
-
-    const handleUpdate = () => {
-        let fd = new FormData();
-        fd.append('title',book.title);
-        fd.append('author',book.author);
-        fd.append('genre',book.genre);
-        fd.append('pages',book.pages);
-        fd.append('images',book.images,book.images.name);
-        fd.append('resource',book.resource,book.resource.name);
-
-        // // axios.put(`/api/user/Book/Update/${props.bId}`,fd,
-        // // {
-        // //     headers: {
-        // //         'content-type': `multipart/form-data;`,
-        // //         Authorization: 'Bearer ' + localStorage.getItem('token') //the token is a variable which holds the token
-        // //     }
-        // // }).then(response =>
-        // //     console.log(response.data)
-        // // ).catch(error => console.log(error.response));
-        console.log('fd',fd,'book',book);
-    }
 
     React.useEffect(() => {
         setImagePreviewUrl(props.item.images)
@@ -104,37 +54,10 @@ export default function DetailItem(props) {
             author: props.item.author,
             genre: props.item.genre,
             owner: props.item.user,
-            images: null,
-            resource: null
+            images: props.item.images,
+            resource: props.item.resource
         });
-    },[])
-
-    React.useEffect(() => {
-        if (!selectedFile) {
-            // setImagePreviewUrl(undefined);
-            return;
-        }
-
-        const objectUrl = URL.createObjectURL(selectedFile);
-        setImagePreviewUrl(objectUrl);
-        setBook({...book,images: selectedFile});
-        return () => URL.revokeObjectURL(objectUrl);
-    }, [selectedFile]);
-
-    React.useEffect(() => {
-        console.log(imagePreviewUrl);
-    },[imagePreviewUrl]);
-
-    React.useEffect(() => {
-        if (!selectedAttachFile) {
-            // setSelectedAttachFile(undefined);
-            return;
-        }
-        setBook({...book,resource: selectedAttachFile});
-        console.log(selectedAttachFile);
-    }, [selectedAttachFile]);
-
-    React.useEffect(() => console.log(book),[book]);
+    },[]);
 
     return (
         <div>
@@ -160,45 +83,6 @@ export default function DetailItem(props) {
                                     />
                                 </GridListTile>
                             </GridList>
-                            {
-                                openEdit ?
-                                <>
-                                    <input
-                                    accept='image/*'
-                                    className={classes.hide}
-                                    id='contained-button-file'
-                                    multiple
-                                    type='file'
-                                    onChange={handlePreview}
-                                    />
-                                    <label htmlFor='contained-button-file'>
-                                    <IconButton
-                                        color='primary'
-                                        aria-label='upload picture'
-                                        component='span'
-                                    >
-                                        <PhotoCamera />
-                                    </IconButton>
-                                    </label>
-                                    <input
-                                    accept='application/pdf'
-                                    className={classes.hide}
-                                    id='contained-button-attachfile'
-                                    multiple
-                                    type='file'
-                                    onChange={handleAttachFile}
-                                    />
-                            <label htmlFor='contained-button-attachfile'>
-                                <IconButton
-                                    color='primary'
-                                    aria-label='attach file'
-                                    component='span'
-                                >
-                                    <AttachFile />
-                                </IconButton>
-                            </label>
-                                </> : null
-                            }
                         </Grid>
                         <Grid item xs={8}>
                             <TextField
@@ -209,9 +93,8 @@ export default function DetailItem(props) {
                                 type='text'
                                 fullWidth
                                 value={book.title}
-                                onChange={handleChange('title')}
                                 InputProps={{
-                                    readOnly: !openEdit
+                                    readOnly: true
                                 }}
                             />
                             <TextField
@@ -221,9 +104,8 @@ export default function DetailItem(props) {
                                 type='number'
                                 fullWidth
                                 value={book.pages}
-                                onChange={handleChange('pages')}
                                 InputProps={{
-                                    readOnly: !openEdit
+                                    readOnly: true
                                 }}
                             />
                             <TextField
@@ -233,9 +115,8 @@ export default function DetailItem(props) {
                                 type='text'
                                 fullWidth
                                 value={book.author}
-                                onChange={handleChange('author')}
                                 InputProps={{
-                                    readOnly: !openEdit
+                                    readOnly: true
                                 }}
                             />
                             <TextField
@@ -245,9 +126,9 @@ export default function DetailItem(props) {
                                 type='text'
                                 fullWidth
                                 value={book.genre}
-                                onChange={handleChange('genre')}
+
                                 InputProps={{
-                                    readOnly: !openEdit
+                                    readOnly: true
                                 }}
                             />
                             <TextField
@@ -257,46 +138,18 @@ export default function DetailItem(props) {
                                 type='text'
                                 fullWidth
                                 value={book.owner}
-                                onChange={handleChange('owner')}
                                 InputProps={{
-                                    readOnly: !openEdit
+                                    readOnly: true
                                 }}
                             />
-                            {/* {selectedAttachFile && (
-                                <TextField
-                                    id='file'
-                                    type='text'
-                                    fullWidth
-                                    value={selectedAttachFile.name}
-                                    InputProps={{
-                                        readOnly: true
-                                    }}
-                                    variant='outlined'
-                                />
-                            )} */}
                         </Grid>
                     </Grid>
                 </DialogContent>
-
-                    {
-                        openEdit ?
                     <DialogActions>
-                        <Button color='primary' onClick={handleUpdate}>
-                        Save
-                        </Button>
                         <Button onClick={props.handleClose}>
                         Close
                         </Button>
-                    </DialogActions> :
-                    <DialogActions>
-                        <Button onClick={handleOpenEdit}>
-                        Edit
-                        </Button>
-                        <Button onClick={props.handleClose} color='primary'>
-                        Close
-                        </Button>
                     </DialogActions>
-                    }
             </Dialog>
         </div>
     );
