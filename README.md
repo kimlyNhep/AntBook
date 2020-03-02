@@ -7,8 +7,16 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
 </p>
 
+## With
+
 # [React](https://reactjs.org/) &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/facebook/react/blob/master/LICENSE) [![npm version](https://img.shields.io/npm/v/react.svg?style=flat)](https://www.npmjs.com/package/react) [![CircleCI Status](https://circleci.com/gh/facebook/react.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/facebook/react) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://reactjs.org/docs/how-to-contribute.html#your-first-pull-request)
 
 ## Getting Start
-## 1.-- clone project vai https://github.com/kimlyNhep/AntBook
+## 1. clone project vai https://github.com/kimlyNhep/AntBook
+# 2. composer install 
+# 3. npm install 
+# 4. npm run dev
+# 5. php artisan migrate
+# 6. php artisan db:seed --class=AdminsTableSeeder
+# 7. php artisan serve
 
