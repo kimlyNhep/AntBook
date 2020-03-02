@@ -283,8 +283,19 @@ class UsersController extends Controller
     public function deleteBook($book_id)
     {
         $title = TmpBook::where('id',$book_id)->first()->title;
+
+        $imagePath = TmpBook::where('id',$book_id)->first()->images;
+        $filePath = TmpBook::where('id',$book_id)->first()->resource;
+
+        $_imagePath = Book::where('title','=',$title)->first()->images;
+        $_filePath = Book::where('title','=',$title)->first()->resource;
+
         $book = TmpBook::find($book_id)->delete();
         Book::where('title','=',$title)->delete();
-        return response()->json(['succuss' => $title],200);
+
+        if(file_exists(public_path($_imagePath))) @unlink(public_path($_imagePath));
+        if(file_exists(public_path($_filePath))) @unlink(public_path($_filePath));
+
+        return response()->json(['succuss' => $imagePath],200);
     }
 }

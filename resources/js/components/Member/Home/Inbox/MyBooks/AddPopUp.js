@@ -93,8 +93,20 @@ function AddPopUp(props) {
         fd.append('author',book.author);
         fd.append('genre_id',book.genre_id);
         fd.append('pages',book.pages);
-        fd.append('images',book.images,book.images.name);
-        fd.append('resource',book.resource,book.resource.name);
+        if(book.images != null)
+            fd.append('images',book.images,book.images.name);
+        else {
+            props.setOpenError(true);
+            props.setMessage('image is required!');
+            return;
+        }
+        if(book.resource != null)
+            fd.append('resource',book.resource,book.resource.name);
+        else {
+            props.setOpenError(true);
+            props.setMessage('book source is required!');
+            return;
+        }
 
         axios.post('/api/user/addBook',fd,{
             headers: {
@@ -105,7 +117,10 @@ function AddPopUp(props) {
             // props.loadlist();
             props.handleClose();
             location.reload();
-        }).catch(error => console.log(error.response));
+        }).catch(error => {
+            props.setOpenError(true);
+            props.setMessage(error.response.data.message);
+        });
     }
 
     useEffect(() => {

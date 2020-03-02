@@ -99,7 +99,9 @@ export default function LoginCard(props) {
             }
         }).catch(error=> {
             props.setLoading(false);
+            props.setOpenError(true);
             console.log(error.response.data.error);
+            props.setMessage(error.response.data.error);
         })
     }
 

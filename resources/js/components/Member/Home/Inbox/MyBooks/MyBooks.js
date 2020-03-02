@@ -17,6 +17,7 @@ import AddPopUp from './AddPopUp';
 import Fab from '@material-ui/core/Fab';
 import Typography from '@material-ui/core/Typography';
 import axios from 'axios';
+import MsgError from '../../../../Snackbar/error';
 
 const Arrow = ({ text, className }) => {
     return className === 'arrow-prev' ? <ArrowPrev /> : <ArrowNext />;
@@ -141,6 +142,8 @@ function Books(props) {
         resource: null,
         author: ''
     })
+    const [openError,setOpenError] = React.useState(false);
+    const [message,setMesssage] = React.useState('');
 
     React.useEffect(() => {
         console.log('book',bookData);
@@ -220,7 +223,11 @@ function Books(props) {
             )}
             {addBook && (
                 <AddPopUp open={addBook} handleClose={handleAddBookClose}
-                book={book} genre_id={props.gId} setBook={setBook} />
+                book={book} genre_id={props.gId} setBook={setBook}
+                setOpenError={setOpenError} setMessage={setMesssage}/>
+            )}
+            {openError && (
+                <MsgError open={openError} setOpenError={setOpenError} message={message}/>
             )}
         </Paper>
     );
